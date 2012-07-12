@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.PorterDuff.Mode;
 
@@ -28,11 +29,11 @@ class Teapot implements TimerAnimation.TimerDrawing
 		Resources resources = context.getResources();
 		
 		mProgressPaint = new Paint();
-		mProgressPaint.setColor(Color.GRAY);
-		mProgressPaint.setAlpha(135);
+		mProgressPaint.setColor(Color.BLACK);
+		mProgressPaint.setAlpha(255);
 		mProgressPaint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
 		
-		mCupBitmap = BitmapFactory.decodeResource(resources, R.drawable.teapot);	
+		mCupBitmap = BitmapFactory.decodeResource(resources, R.drawable.leaf);	
 		mHeight = mCupBitmap.getHeight();
 		mWidth = mCupBitmap.getWidth();
 
@@ -47,19 +48,30 @@ class Teapot implements TimerAnimation.TimerDrawing
 	public void updateImage(Canvas canvas, int time, int max) {
 	
 		canvas.save();
-		float w = canvas.getClipBounds().width();
-		float h = canvas.getClipBounds().height();
+		int w = canvas.getClipBounds().width();
+		int h = canvas.getClipBounds().height();
 		
-		canvas.translate(w/2.0f - mWidth/2.0f,
-						 h/2.0f - mHeight/2.0f);
+		Rect rs = new Rect(0, 0, mWidth, mHeight);
+		Rect rd;
 		
-		canvas.drawBitmap(mCupBitmap, 0, 0,null);
+		if(w < h) {
+			rd = new Rect(0,0,w,w);
+			canvas.translate(0,(h-w)/2);
+		}
+		else {
+			rd = new Rect(0,0,h,h);
+			canvas.translate((w-h)/2,0);
+		}
+		
+		
+		canvas.drawBitmap(mCupBitmap, rs, rd, null);
 		
 		float p = (max != 0) ? (time/(float)max) : 0;
 		
-		if(p == 0) p = 1;
+		//if(p == 0) p = 1;
 		
-		RectF fill = new RectF(0,mHeight*(p),mWidth,mHeight);
+		RectF fill = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
+		mProgressPaint.setAlpha((int)(255-(255*p)));
 		canvas.drawRect(fill,mProgressPaint);	
 		
 		canvas.restore();

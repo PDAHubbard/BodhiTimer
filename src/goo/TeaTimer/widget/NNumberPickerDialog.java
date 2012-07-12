@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,7 +53,6 @@ public class NNumberPickerDialog extends AlertDialog implements OnClickListener 
         void onNumbersPicked(int[] number);
     }
 
-    private final List<NumberPicker>      pickers = new LinkedList<NumberPicker>();
     private final OnNNumberPickedListener mCallback;
 
     private int hsel;
@@ -129,9 +129,10 @@ public class NNumberPickerDialog extends AlertDialog implements OnClickListener 
     class MyGestureDetector extends SimpleOnGestureListener {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-
-			velocityX=velocityX/5;
-
+			if(velocityX < 0)
+				velocityX=velocityX*velocityX/(-8000);
+			else
+				velocityX=velocityX*velocityX/8000;
 			return super.onFling(e1, e2, velocityX, velocityY);
 		}
 
