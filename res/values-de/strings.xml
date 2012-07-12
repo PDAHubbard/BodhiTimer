@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Tea Timer</string>
+    <string name="app_name">Bodhi Timer</string>
 	<string name="Start">Timer setzen</string>
 	<string name="Stop">Zurücksetzen</string>
 

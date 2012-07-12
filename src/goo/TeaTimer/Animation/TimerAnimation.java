@@ -14,8 +14,9 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 
-public class TimerAnimation extends View implements OnClickListener, OnSharedPreferenceChangeListener
+public class TimerAnimation extends ImageView implements OnClickListener, OnSharedPreferenceChangeListener
 {		
 	Vector<TimerDrawing> mDrawings = null;
 	int mIndex = 0;
@@ -46,9 +47,9 @@ public class TimerAnimation extends View implements OnClickListener, OnSharedPre
 		prefs.registerOnSharedPreferenceChangeListener(this);
 				
 		mDrawings = new Vector<TimerDrawing>();
+		mDrawings.add(new Teapot(context));
 		mDrawings.add(new CircleAnimation(context));
 		//mDrawings.add(new TrashCupAnimation(context));
-		mDrawings.add(new Teapot(context));
 		
 		setOnClickListener(this);
 	}

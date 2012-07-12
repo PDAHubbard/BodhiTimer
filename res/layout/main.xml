@@ -68,7 +68,7 @@
 	android:layout_height="fill_parent"
 	android:gravity="center"
 	android:adjustViewBounds="true"
-	android:scaleType="center" 
+	android:scaleType="centerInside" 
 />
 
 </LinearLayout>
