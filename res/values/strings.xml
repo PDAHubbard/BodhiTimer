@@ -17,34 +17,31 @@
 	
 	<!-- Preferences -->
 	<string name="notification">Notification</string>
-	<string name="notification_sound">Notification Diddy</string>
-	<string name="notification_sound_desc">The notification\'s sound effects.</string>
+	<string name="notification_sound">Notification Sound</string>
+	<string name="notification_sound_desc">The notification\'s sound effect.</string>
 	
 	<string name="notification_vibrate">Notification Vibrate</string>
-	<string name="notification_vibrate_desc">Should the timer notification Vibrate.</string>
+	<string name="notification_vibrate_desc">Cause the timer to trigger vibration.</string>
 	
 	<string name="led_Notification">LED Notification</string>
-	<string name="led_Notification_desc">Blink the LED lights during the notification.</string>
+	<string name="led_Notification_desc">Blink LED light during notification.</string>
 
 	<string name="auto_clear">Clear automatically</string>
 	<string name="auto_clear_desc">Clear notification automatically after a few seconds.</string>
 	
 	<string name="visual">Visual</string>
 	
-	<string name="color_theme">Color Theme</string>
-	<string name="color_theme_desc">Select the theme for the visualization</string>
+	<string name="color_theme">Circle Theme</string>
+	<string name="color_theme_desc">(Click on Bodhi leaf to toggle the circle animation)</string>
 	
 	<string name="misc">Misc</string>
 	
-	<string name="nag_dialog">Nag Dialog</string>
-	<string name="nag_dialog_desc">When the phone is set to silent show a nag dialog.</string>
+	<string name="nag_dialog">Popup Dialog</string>
+	<string name="nag_dialog_desc">When the phone is set to silent show a popup dialog.</string>
 	
 	<string name="stay_awake">Stay awake</string>
 	<string name="stay_awake_desc">Don\'t allow the phone to go to sleep.</string>
 
-	<string name="repeat_rate">Repeat rate</string>
-	<string name="repeat_rate_desc">Button repeats per second on long press in the number picker.</string>
-	
 	<!-- About -->
 	<string name="close">Close</string>
 	<string name="about">About</string>

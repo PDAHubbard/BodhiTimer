@@ -26,5 +26,13 @@
 	<color name="themeC4">#C1D4C8</color>
 	<color name="themeC5">#DEDAB8</color>
 	
+	
+	<!-- Enso -->
+	<color name="themeD1">#000000</color>
+	<color name="themeD2">#010101</color>
+	<color name="themeD3">#FFFFFF</color>
+	<color name="themeD4">#DDDDDD</color>
+	<color name="themeD5">#010101</color>
+	
 </resources>
 
