@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <resources> 
 	<array name="themes"> 
+        <item>Zen Enso</item> 
         <item>Original Green</item> 
         <item>Bright Yellow</item> 
         <item>Sky</item> 
     </array>
      
     <array name="themeValues"> 
+        <item>"3"</item>
         <item>"0"</item>
         <item>"1"</item>
         <item>"2"</item>
