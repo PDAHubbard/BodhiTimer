@@ -166,7 +166,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         		getResources(), R.drawable.play);
    
 		mTimerLabel1 = (TextView)findViewById(R.id.text_top);
-		mTimerLabel2 = (TextView)findViewById(R.id.text_bottom);
 
 		mTimerAnimation = (TimerAnimation)findViewById(R.id.imageView);
 		mTimerAnimation.setMaxHeight(mTimerAnimation.getMeasuredHeight());
@@ -332,8 +331,16 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	public void updateLabel(int time){
         time += 999;  // round seconds upwards
 		String[] str = TimerUtils.time2str(time);
-		mTimerLabel1.setText(str[0]);
-		mTimerLabel2.setText(str[1]);
+		if(str.length == 3)
+			mTimerLabel1.setText(str[0]+":"+str[1]+":"+str[2]);
+		else if(str.length == 2)
+			mTimerLabel1.setText(str[0]+":"+str[1]);
+		else if(str.length == 1)
+			mTimerLabel1.setText(str[0]);
+		else
+			mTimerLabel1.setText("");
+
+		//mTimerLabel2.setText(str[1]);
 	}
 
 	
