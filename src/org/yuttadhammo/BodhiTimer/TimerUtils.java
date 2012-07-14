@@ -31,16 +31,16 @@ public class TimerUtils {
 		int [] time = time2Mhs(ms);
  
 		if(time[0] == 0 && time[1] == 0 && time[2] == 0){
-			return new String[] {"",""};
+			return new String[] {};
 		}
 		else if(time[0] == 0 && time[1] == 0){
-			return new String[] {"",String.format("%01ds",time[2])};
+			return new String[] {String.format("%01d",time[2])};
 		}
 		else if(time[0] == 0){
-			return new String[] {String.format("%01dm",time[1]),String.format("%01ds",time[2])};
+			return new String[] {String.format("%01d",time[1]),String.format("%02d",time[2])};
 		}
 		else {
-			return new String[] {String.format("%01dh",time[0]),String.format("%01dm",time[1])};
+			return new String[] {String.format("%01d",time[0]),String.format("%02d",time[1]),String.format("%02d",time[2])};
 		}
 	}
  
