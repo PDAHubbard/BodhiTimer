@@ -1,79 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
-    android:orientation="horizontal"
-    android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-    >
-<LinearLayout 
-    android:orientation="vertical"
-    android:layout_width="wrap_content"
-	android:layout_height="fill_parent"
-	android:layout_marginTop="15dp"
-	android:layout_marginLeft="10dp"
-	android:layout_marginRight="10dp"
-	android:layout_marginBottom="15dp"
-	android:paddingTop="30dp"
-	android:paddingLeft="20dp"
-	android:paddingRight="20dp"
-	android:background="@drawable/border"
-	android:paddingBottom="15dp">
-	
-	<TextView 
-		android:id="@+id/label" 
-	    android:layout_height="wrap_content" 
-	    android:layout_width="200dp"
-		android:text="00:00"
-		android:textSize="60dp"
-		android:gravity="center" android:paddingBottom="5dp"/>
-	
-	<LinearLayout 
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:orientation="horizontal"
-		android:id="@+id/control"
-		>
-	
+<RelativeLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+    
+	<org.yuttadhammo.BodhiTimer.Animation.TimerAnimation
+		android:id="@+id/imageView"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:gravity="center"
+		android:adjustViewBounds="true"
+		android:scaleType="centerInside" 
+	/>
+	<RelativeLayout 
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		android:id="@+id/leftPanel"
+		android:layout_alignParentLeft="true">	
 		<ImageButton 
-			android:id="@+id/pauseButton"
-			android:layout_height="50dp"
-			android:layout_width="fill_parent"
-			android:layout_weight=".5"
-			android:src="@drawable/pause"
-			android:paddingLeft="15dp"
-			/>
-		
-		<ImageButton 
-			android:id="@+id/cancelButton"
-			android:layout_height="50dp"
-			android:layout_width="fill_parent"
-			android:layout_weight=".5"
-			android:src="@drawable/cancel"
-			android:paddingLeft="15dp"
-			/>
-			
-		<Button 
+		    android:contentDescription="@string/set"
 			android:id="@+id/setButton"
-			android:layout_height="80dp"
-			android:layout_width="fill_parent"
-			android:text="@string/Start"
-			android:layout_weight=".5"
-			android:paddingTop="10dp"
-			android:paddingBottom="10dp"
-			android:textSize="25dp"
-			android:drawableLeft="@drawable/icon"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:src="@drawable/set"
+			android:layout_alignParentTop="true"
+			android:background="#00000000"
+			android:padding="20dp"
+			android:gravity="center" 
 			/>
-	</LinearLayout>
-</LinearLayout>
+    	<TextView 
+			android:id="@+id/text_top"
+		    android:layout_width="wrap_content" 
+		    android:layout_height="match_parent" 
+			android:text=""
+			android:textSize="60dp"
+			android:gravity="center" 
+			/>
+	    <ImageButton 
+		    android:contentDescription="@string/pause"
+			android:id="@+id/pauseButton"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:src="@drawable/pause"
+			android:layout_alignParentBottom="true"
+			android:background="#00000000"
+			android:padding="20dp"
+			android:gravity="center" 
+			/>
+	</RelativeLayout>
+	<RelativeLayout 
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		android:id="@+id/rightPanel"
+		android:layout_alignParentRight="true">		
+		<ImageButton 
+		    android:contentDescription="@string/prefs"
+			android:id="@+id/prefButton"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:src="@drawable/preferences"
+			android:layout_alignParentTop="true"
+			android:background="#00000000"
+			android:padding="20dp"
+			android:gravity="center" 
+			/>
 
-<org.yuttadhammo.BodhiTimer.Animation.TimerAnimation
-	android:id="@+id/imageView"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:layout_margin="20dp"
-	android:gravity="center"
-	android:adjustViewBounds="true"
-	android:scaleType="center" 
-/>
+    	<TextView 
+			android:id="@+id/text_bottom"
+		    android:layout_width="wrap_content" 
+		    android:layout_height="match_parent" 
+			android:text=""
+			android:textSize="60dp"
+			android:gravity="center" 
+			android:layout_alignParentBottom="true"
+			/>
+		<ImageButton 
+		    android:contentDescription="@string/Stop"
+			android:id="@+id/cancelButton"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:gravity="center" 
+			android:src="@drawable/stop"
+			android:layout_alignParentBottom="true"
+			android:background="#00000000"
+			android:padding="20dp"
+			/>
+	</RelativeLayout>				
 
-</LinearLayout>
+
+</RelativeLayout>
 
