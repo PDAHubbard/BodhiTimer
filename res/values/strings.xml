@@ -51,9 +51,16 @@
 	<string name="about_details_licence">Bodhi Timer is free and open source software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.</string>
 	<string name="about_details_url">http://www.gnu.org/licenses/gpl.html</string>
 	<string name="about_site">Get the latest version of the source code on Github.</string>
-	<string name="about_site_url">https://github.com/yuttadhammo/BodhiTimer</string>	
+	<string name="about_site_url">https://github.com/yuttadhammo/BodhiTimer</string>
 	
-	
+	<string name="zero">00</string>	
+	<string name="set">Set</string>	
+	<string name="pause">Pause</string>	
+			
+	<string name="H">H</string>	
+	<string name="M">M</string>	
+	<string name="S">S</string>	
+			
 		
 </resources>
 
