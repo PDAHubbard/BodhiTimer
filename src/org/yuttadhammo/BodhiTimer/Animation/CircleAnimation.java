@@ -122,7 +122,7 @@ class CircleAnimation implements TimerAnimation.TimerDrawing
 				break;				
 		}
 
-		mEnsoBitmap = BitmapFactory.decodeResource(resources, R.drawable.enso);	
+		mEnsoBitmap = BitmapFactory.decodeResource(resources, R.drawable.ensow);	
 		eHeight = mEnsoBitmap.getHeight();
 		eWidth = mEnsoBitmap.getWidth();
 		
@@ -219,29 +219,7 @@ class CircleAnimation implements TimerAnimation.TimerDrawing
 		mSecondRect.set(-mSecondRadius, -mSecondRadius, mSecondRadius, mSecondRadius);
 		mArcRect.set(-mRadius, -mRadius, mRadius, mRadius);
 			
-		// Ms Arc
-		if(showMs){
-			float pMs = (float)((timeVec[3]/1000.00));
-			float thetaMs = pMs*360;
 
-			mMsRect.set(-mMsRadius, -mMsRadius, mMsRadius, mMsRadius);		
-			canvas.drawCircle(0,0,mMsRadius, (mMsFlipper) ? mCirclePaint : mMsPaint );
-			canvas.drawArc(mMsRect, START_ANGLE, thetaMs, true, (mMsFlipper) ? mMsPaint: mCirclePaint);
-		}
-		// We want to draw a very thin border
-		else{
-			canvas.drawCircle(0,0,mMsRadius, mMsPaint );
-		}
-	
-		// Gap between the ms and seconds
-		canvas.drawCircle(0,0,mMsGap,mInnerPaint);
-				
-		//Second arc
-		canvas.drawCircle(0,0,mSecondRadius,mSecondBgPaint);
-		canvas.drawArc(mSecondRect, START_ANGLE, thetaSecond, true, mSecondPaint);
-		
-		// Gap between the seconds and the inner radius
-		canvas.drawCircle(0,0,mSecondGap,mInnerPaint);
 
 		mLastTime = timeVec;
 		
@@ -250,7 +228,7 @@ class CircleAnimation implements TimerAnimation.TimerDrawing
 		if(theme == 3) {
 			
 			// white background
-			canvas.drawCircle(0,0,mRadius,mArcPaint);
+			//canvas.drawCircle(0,0,mRadius,mArcPaint);
 			
 			// enso
 
@@ -287,6 +265,32 @@ class CircleAnimation implements TimerAnimation.TimerDrawing
 			//canvas.drawCircle(0,0,mInnerRadius,mInnerPaint);			
 		}
 		else {
+
+			// Ms Arc
+			if(showMs){
+				float pMs = (float)((timeVec[3]/1000.00));
+				float thetaMs = pMs*360;
+
+				mMsRect.set(-mMsRadius, -mMsRadius, mMsRadius, mMsRadius);		
+				canvas.drawCircle(0,0,mMsRadius, (mMsFlipper) ? mCirclePaint : mMsPaint );
+				canvas.drawArc(mMsRect, START_ANGLE, thetaMs, true, (mMsFlipper) ? mMsPaint: mCirclePaint);
+			}
+			// We want to draw a very thin border
+			else{
+				canvas.drawCircle(0,0,mMsRadius, mMsPaint );
+			}
+		
+			// Gap between the ms and seconds
+			canvas.drawCircle(0,0,mMsGap,mInnerPaint);
+					
+			//Second arc
+			canvas.drawCircle(0,0,mSecondRadius,mSecondBgPaint);
+			canvas.drawArc(mSecondRect, START_ANGLE, thetaSecond, true, mSecondPaint);
+			
+			// Gap between the seconds and the inner radius
+			canvas.drawCircle(0,0,mSecondGap,mInnerPaint);
+			
+			
 			// Background fill
 			canvas.drawCircle(0,0,mRadius,mCirclePaint);
 			
