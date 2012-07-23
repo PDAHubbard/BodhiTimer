@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
@@ -42,12 +43,12 @@ import android.os.SystemClock;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -138,6 +139,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 	private WakeLock mWakeLock;
     
+	// for cancelling notifications
+	
+	private NotificationManager mNM;
+	
 	/** Called when the activity is first created.
      *	{ @inheritDoc} 
      */
@@ -172,65 +177,16 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		mTimerAnimation.setMaxWidth(mTimerAnimation.getMeasuredWidth());
 		
         enterState(STOPPED);
+        
       
         // Store some useful values
         mSettings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         mAlarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         mAudioMgr = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        mNM = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
        
 		mSettings.registerOnSharedPreferenceChangeListener(this);
     }
-    
-
-    /** { @inheritDoc} */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-    	MenuItem item = menu.add(0, PREF, 0, getResources().getString(R.string.prefs));
-    	MenuItem about = menu.add(1,1,0, getResources().getString(R.string.about));
-    	    	
-    	item.setIcon(android.R.drawable.ic_menu_preferences);
-    	about.setIcon(android.R.drawable.ic_menu_info_details);
-    	
-    	return super.onCreateOptionsMenu(menu);
-    }
-    
-
-    /** { @inheritDoc} */
-	@Override 
-	public boolean onOptionsItemSelected(MenuItem item) 
-	{  
-		switch(item.getItemId()){
-		
-			case PREF:
-				startActivity(new Intent(this, TimerPrefActivity.class));	
-				break;
-				
-			case ABOUT:
-				//new TimerAboutDialog(this).show();
-				//break;
-				LayoutInflater li = LayoutInflater.from(this);
-	            View view = li.inflate(R.layout.about, null);
-				
-				Builder p = new AlertDialog.Builder(this).setView(view);
-	            final AlertDialog alrt = p.create();
-	            alrt.setIcon(R.drawable.icon);
-	            alrt.setTitle(getString(R.string.about_title));
-	            alrt.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.close),
-	                    new DialogInterface.OnClickListener() {
-	                        public void onClick(DialogInterface dialog,
-	                                int whichButton) {
-	                        }
-	                    });
-	            alrt.show();
-	            return true;
-				
-			default:
-				return false;
-		}		
-		return true;
-	}
-    
 
 	/** { @inheritDoc} */
     @Override 
@@ -256,6 +212,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         	}break;
         	
         	case STOPPED:
+                mNM.cancelAll();
         	case PAUSED:
         	{
         		editor.putLong("TimeStamp", 1);
@@ -272,7 +229,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     @Override 
     public void onResume()
     {
-      	super.onResume();
+    	super.onResume();
 	    		
     	// check the timestamp from the last update and start the timer.
     	// assumes the data has already been loaded?   
@@ -302,6 +259,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
             	break;
         	
         	case STOPPED:
+                mNM.cancelAll();
         		enterState(STOPPED);
         		break;
         	
@@ -312,8 +270,19 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         		break;  	
         }
 	}
-   
- 
+
+    @Override
+    public boolean onKeyDown(int keycode, KeyEvent e) {
+        mNM.cancelAll();
+        switch(keycode) {
+        case KeyEvent.KEYCODE_MENU:
+    		startActivity(new Intent(this, TimerPrefActivity.class));	
+            return true;
+        }
+        return super.onKeyDown(keycode, e);
+    }
+
+    
     /**
      * Updates the time 
      */

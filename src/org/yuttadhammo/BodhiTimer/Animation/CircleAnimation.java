@@ -21,7 +21,7 @@ import android.graphics.Rect;
 
 class CircleAnimation implements TimerAnimation.TimerDrawing
 {
-	private static final float MAX_SIZE = 500;
+	private static final float MAX_SIZE = 1000;
 
 	private final int START_ANGLE = 90;
 	
@@ -226,9 +226,6 @@ class CircleAnimation implements TimerAnimation.TimerDrawing
 		// enso
 
 		if(theme == 3) {
-			
-			// white background
-			//canvas.drawCircle(0,0,mRadius,mArcPaint);
 			
 			// enso
 

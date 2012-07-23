@@ -1,9 +1,19 @@
 package org.yuttadhammo.BodhiTimer;
 
 
+import java.io.IOException;
+import java.util.prefs.Preferences;
+
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
+import android.preference.PreferenceManager;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -11,10 +21,13 @@ import android.util.Log;
 public class TimerPrefActivity extends PreferenceActivity 
 {
 	private static final String TAG = TimerPrefActivity.class.getSimpleName();
+	private SharedPreferences settings;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
@@ -52,8 +65,8 @@ public class TimerPrefActivity extends PreferenceActivity
 	        cursor.close();   
 		}
         
-    	CharSequence [] entries = {"No Sound","Bell","Buddham"};
-    	CharSequence [] entryValues = {"","android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.buddham};
+    	CharSequence [] entries = {"No Sound","Three Bells","Gong","Singing Bowl"};
+    	CharSequence [] entryValues = {"","android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.gong,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bowl};
     	
     	//Default value
     	if(tone.getValue() == null) tone.setValue((String)entryValues[1]);
@@ -65,6 +78,28 @@ public class TimerPrefActivity extends PreferenceActivity
     		tone.setEntries(entries);
     		tone.setEntryValues(entryValues);
     	}
+
+
+        Preference play = (Preference)findPreference("playSound");
+
+    	play.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+			
+    		@Override
+			public boolean onPreferenceClick(Preference preference) {
+                MediaPlayer player = new MediaPlayer();
+                try {
+                    String notificationUri = settings.getString("NotificationUri", "android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell);
+					player.setDataSource(TimerPrefActivity.this, Uri.parse(notificationUri));
+	                player.prepare();
+	                player.start();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+                return false;
+			}
+
+    	});
     	
     }
     static private CharSequence [] concat( CharSequence[] A, CharSequence[] B) 
