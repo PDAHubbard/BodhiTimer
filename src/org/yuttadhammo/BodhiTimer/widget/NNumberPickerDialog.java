@@ -22,29 +22,17 @@ package org.yuttadhammo.BodhiTimer.widget;
 
 import org.yuttadhammo.BodhiTimer.R;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.graphics.Color;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.Gallery;
 import android.widget.ArrayAdapter;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
-
 import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.MotionEvent;
 
 /** Dialog box with an arbitrary number of number pickers */
 public class NNumberPickerDialog extends AlertDialog implements OnClickListener {

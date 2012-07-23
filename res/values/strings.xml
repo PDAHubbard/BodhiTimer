@@ -17,9 +17,13 @@
 	
 	<!-- Preferences -->
 	<string name="notification">Notification</string>
-	<string name="notification_sound">Notification Sound</string>
-	<string name="notification_sound_desc">The notification\'s sound effect.</string>
+	<string name="notification_sound">Timer Sound</string>
+	<string name="notification_sound_desc">The sound to play when the timer finishes</string>
+
+	<string name="play_sound">Play Sound</string>
+	<string name="play_sound_desc">Play the current timer sound.</string>
 	
+		
 	<string name="notification_vibrate">Notification Vibrate</string>
 	<string name="notification_vibrate_desc">Cause the timer to trigger vibration.</string>
 	
