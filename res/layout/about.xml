@@ -29,21 +29,26 @@ TODO  : Adapter le texte de la licence
 							android:layout_marginBottom="10dip" />
 			<TextView 		android:layout_width="wrap_content" android:layout_height="wrap_content"
 							android:textSize="12dip" 
+							android:text="@string/about_details_upstream"
+							android:layout_marginBottom="10dip" 
+							android:autoLink="web" />
+			<TextView 		android:layout_width="wrap_content" android:layout_height="wrap_content"
+							android:textSize="12dip" 
 							android:text="@string/about_details_licence" 
-							android:layout_marginTop="10dip" />
+							android:layout_marginBottom="10dip" />
 			<TextView 		android:layout_width="wrap_content" android:layout_height="wrap_content"
 							android:textSize="12dip" 
 							android:text="@string/about_details_url"
-							android:paddingBottom="5dip" 
+							android:layout_marginBottom="10dip" 
 							android:autoLink="web" />
 			<TextView 		android:layout_width="wrap_content" android:layout_height="wrap_content"
 							android:textSize="12dip" 
 							android:text="@string/about_site" 
-							android:layout_marginTop="5dip" />
+							android:layout_marginBottom="10dip" />
 			<TextView 		android:layout_width="wrap_content" android:layout_height="wrap_content"
 							android:textSize="12dip" 
 							android:text="@string/about_site_url"
-							android:paddingBottom="5dip" 
+							android:layout_marginBottom="10dip" 
 							android:autoLink="web" />
 							
 	</LinearLayout>	

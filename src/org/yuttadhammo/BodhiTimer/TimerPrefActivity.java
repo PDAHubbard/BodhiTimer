@@ -4,6 +4,10 @@ package org.yuttadhammo.BodhiTimer;
 import java.io.IOException;
 import java.util.prefs.Preferences;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.MediaPlayer;
@@ -17,15 +21,20 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 
 public class TimerPrefActivity extends PreferenceActivity 
 {
 	private static final String TAG = TimerPrefActivity.class.getSimpleName();
 	private SharedPreferences settings;
+	private Context context;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        context = this;
 
         settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         
@@ -100,7 +109,32 @@ public class TimerPrefActivity extends PreferenceActivity
 			}
 
     	});
-    	
+        Preference about = (Preference)findPreference("aboutPref");
+
+        about.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+			
+    		@Override
+			public boolean onPreferenceClick(Preference preference) {
+				LayoutInflater li = LayoutInflater.from(context);
+	            View view = li.inflate(R.layout.about, null);
+				
+				Builder p = new AlertDialog.Builder(context).setView(view);
+	            final AlertDialog alrt = p.create();
+	            alrt.setIcon(R.drawable.icon);
+	            alrt.setTitle(getString(R.string.about_title));
+	            alrt.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.close),
+	                    new DialogInterface.OnClickListener() {
+	                        public void onClick(DialogInterface dialog,
+	                                int whichButton) {
+	                        }
+	                    });
+	            alrt.show();
+	            return true;
+				   			
+			}
+
+    	});
+    	    	
     }
     static private CharSequence [] concat( CharSequence[] A, CharSequence[] B) 
     {		

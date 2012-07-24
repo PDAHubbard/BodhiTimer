@@ -58,7 +58,11 @@
                 android:title="@string/stay_awake"
                 android:summary="@string/stay_awake_desc" 
                 android:defaultValue="False" />
-    </PreferenceCategory>
+		<Preference
+                android:title="@string/about"
+                android:summary="@string/about_desc"
+                android:key="aboutPref" />	
+	</PreferenceCategory>
     
  
                     

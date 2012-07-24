@@ -22,7 +22,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:label="Preferences" android:name=".TimerPrefActivity">
+        <activity android:label="Preferences" 
+            android:name=".TimerPrefActivity"
+			android:theme="@android:style/Theme.NoTitleBar.Fullscreen" 
+            >
         </activity>
    	 	
 		<receiver android:name=".TimerReceiver" ></receiver>

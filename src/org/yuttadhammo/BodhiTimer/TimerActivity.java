@@ -33,6 +33,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 // import android.net.Uri;
 import android.os.Bundle;
@@ -125,7 +127,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 	private TimerAnimation mTimerAnimation;
 	private TextView mTimerLabel1;
-	private TextView mTimerLabel2;
 	
 	private Bitmap mPlayBitmap,mPauseBitmap;
 
@@ -172,7 +173,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
    
 		mTimerLabel1 = (TextView)findViewById(R.id.text_top);
 
-		mTimerAnimation = (TimerAnimation)findViewById(R.id.imageView);
+		mTimerAnimation = (TimerAnimation)findViewById(R.id.mainImage);
 		mTimerAnimation.setMaxHeight(mTimerAnimation.getMeasuredHeight());
 		mTimerAnimation.setMaxWidth(mTimerAnimation.getMeasuredWidth());
 		
@@ -193,6 +194,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     public void onPause()
     {
     	super.onPause();
+
+    	BitmapDrawable drawable = (BitmapDrawable)mTimerAnimation.getDrawable();
+    	if(drawable != null) {
+		    Bitmap bitmap = drawable.getBitmap();
+		    bitmap.recycle();
+    	}
     	
     	// Save our settings
         SharedPreferences.Editor editor = mSettings.edit();

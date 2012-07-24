@@ -69,7 +69,7 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 	public void updateImage(int time,int max){
 		mLastTime = time;
 		mLastMax = max;
-		
+
 		invalidate();
 	}
 
