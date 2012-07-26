@@ -13,25 +13,19 @@ TODO  : Adapter le texte de la licence
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent">
 	
-	<LinearLayout 	android:layout_width="fill_parent" android:layout_height="fill_parent" 
+	<LinearLayout 	android:layout_width="fill_parent" android:layout_height="wrap_content" 
 					android:orientation="vertical"
 					android:paddingLeft="5dip" 
 					android:paddingRight="5dip" >
 		
-			<TextView 		android:layout_width="fill_parent" android:layout_height="fill_parent" 
+			<TextView 		android:layout_width="fill_parent" android:layout_height="wrap_content" 
 							android:layout_gravity="center"
 							android:id="@+id/about_title"
 		 					android:textSize="20dip" />
 			<TextView 		android:layout_width="wrap_content" android:layout_height="wrap_content"
 							android:textSize="12dip" 
 							android:text="@string/about_details_desc"
-							android:layout_marginTop="5dip"
 							android:layout_marginBottom="10dip" />
-			<TextView 		android:layout_width="wrap_content" android:layout_height="wrap_content"
-							android:textSize="12dip" 
-							android:text="@string/about_details_upstream"
-							android:layout_marginBottom="10dip" 
-							android:autoLink="web" />
 			<TextView 		android:layout_width="wrap_content" android:layout_height="wrap_content"
 							android:textSize="12dip" 
 							android:text="@string/about_details_licence" 
@@ -50,7 +44,11 @@ TODO  : Adapter le texte de la licence
 							android:text="@string/about_site_url"
 							android:layout_marginBottom="10dip" 
 							android:autoLink="web" />
-							
+			<TextView 		android:layout_width="wrap_content" android:layout_height="wrap_content"
+							android:textSize="12dip" 
+							android:text="@string/about_details_upstream"
+							android:layout_marginBottom="10dip" 
+							android:autoLink="web" />							
 	</LinearLayout>	
 	
 </ScrollView>

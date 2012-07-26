@@ -51,6 +51,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -152,6 +153,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     {    	
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+
 
 		mCancelButton = (ImageButton)findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(this);
@@ -187,6 +190,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         mNM = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
        
 		mSettings.registerOnSharedPreferenceChangeListener(this);
+
+		if(mSettings.getBoolean("FULLSCREEN", false))
+				getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
     }
 
 	/** { @inheritDoc} */
@@ -237,7 +243,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     public void onResume()
     {
     	super.onResume();
-	    		
+
+    	if(mSettings.getBoolean("FULLSCREEN", false))
+			getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
+    	else
+        	getWindow().clearFlags(LayoutParams.FLAG_FULLSCREEN); 
+		
     	// check the timestamp from the last update and start the timer.
     	// assumes the data has already been loaded?   
         mLastTime = mSettings.getInt("LastTime",0);    

@@ -13,6 +13,7 @@
 		<Preference
                 android:title="@string/play_sound"
                 android:summary="@string/play_sound_desc"
+                android:icon="@drawable/play"
                 android:key="playSound" />				
         <CheckBoxPreference
                 android:key="Vibrate"
@@ -43,7 +44,11 @@
 			android:entries="@array/themes"
 			android:defaultValue="3"
 			android:entryValues="@array/themeValues" />
-			
+        <CheckBoxPreference
+                android:key="FULLSCREEN"
+                android:title="@string/fullscreen"
+                android:summary="@string/fullscreen_desc" 
+                android:defaultValue="False" />			
     </PreferenceCategory>
     
     

@@ -20,9 +20,12 @@
 	<string name="notification_sound">Timer Sound</string>
 	<string name="notification_sound_desc">The sound to play when the timer finishes</string>
 
-	<string name="play_sound">Play Sound</string>
+	<string name="play_sound">Test Sound</string>
 	<string name="play_sound_desc">Play the current timer sound.</string>
-	
+
+	<string name="playing_sound">Stop Sound</string>
+	<string name="playing_sound_desc">Click to stop the current playing sound.</string>
+		
 		
 	<string name="notification_vibrate">Notification Vibrate</string>
 	<string name="notification_vibrate_desc">Cause the timer to trigger vibration.</string>
@@ -38,6 +41,9 @@
 	<string name="color_theme">Circle Theme</string>
 	<string name="color_theme_desc">(Click on Bodhi leaf to toggle the circle animation)</string>
 	
+	<string name="fullscreen">Full Screen</string>
+	<string name="fullscreen_desc">Hide the status bar when running</string>
+		
 	<string name="misc">Misc</string>
 	
 	<string name="nag_dialog">Popup Dialog</string>
@@ -54,12 +60,12 @@
 	<string name="about">About</string>
 	<string name="about_website">Bodhi Timer on Github</string>
 	<string name="about_title">About Bodhi Timer</string>
-	<string name="about_details_desc">Bodhi Timer will help you time your meditation.\n\nIt is a fork of the open source TeaTimer app by Ralph Gootee &lt;rgootee@gmail.com&gt;, which is also available on GitHub:</string>
-	<string name="about_details_upstream">https://github.com/ralphleon/TeaTimer</string>
+	<string name="about_details_desc">Bodhi Timer is an elegant, minimalist countdown timer, designed mainly for use as a meditation timer, but it can easily be used for any similar purpose.\n\nSet the time via the clock icon in the top left, pause/resume via the buttons in the bottom left, and stop the timer via the button in the bottom right.  The top right button is the preference button.\n\nClicking on the Bodhi leaf changes to one of four circle animations, which can be chosen from the preferences screen.</string>
 	<string name="about_details_licence">Bodhi Timer is free and open source software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.</string>
 	<string name="about_details_url">http://www.gnu.org/licenses/gpl.html</string>
 	<string name="about_site">Get the latest version of the source code on github:</string>
 	<string name="about_site_url">https://github.com/yuttadhammo/BodhiTimer</string>
+	<string name="about_details_upstream">Bodhi Timer is a fork of the open source TeaTimer app by Ralph Gootee &lt;rgootee@gmail.com&gt;, which is also available on GitHub:\n\nhttps://github.com/ralphleon/TeaTimer</string>
 	
 	<string name="zero">00</string>	
 	<string name="set">Set</string>	
