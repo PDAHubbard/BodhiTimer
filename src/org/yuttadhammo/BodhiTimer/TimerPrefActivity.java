@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -23,12 +24,14 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager.LayoutParams;
 
 public class TimerPrefActivity extends PreferenceActivity 
 {
 	private static final String TAG = TimerPrefActivity.class.getSimpleName();
 	private SharedPreferences settings;
 	private Context context;
+	private MediaPlayer player;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +40,9 @@ public class TimerPrefActivity extends PreferenceActivity
         context = this;
 
         settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        
+		if(settings.getBoolean("FULLSCREEN", false))
+			getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
+       
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
         
@@ -79,6 +84,7 @@ public class TimerPrefActivity extends PreferenceActivity
     	
     	//Default value
     	if(tone.getValue() == null) tone.setValue((String)entryValues[1]);
+    	tone.setDefaultValue((String)entryValues[1]);
     	
     	if( items != null && items.length > 0){
     		tone.setEntries(concat(entries,items));
@@ -88,27 +94,47 @@ public class TimerPrefActivity extends PreferenceActivity
     		tone.setEntryValues(entryValues);
     	}
 
+        player = new MediaPlayer();
 
         Preference play = (Preference)findPreference("playSound");
 
     	play.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			
     		@Override
-			public boolean onPreferenceClick(Preference preference) {
-                MediaPlayer player = new MediaPlayer();
+			public boolean onPreferenceClick(final Preference preference) {
+    			if(player.isPlaying()) {
+    				player.stop();
+    				preference.setTitle(context.getString(R.string.play_sound));
+    				preference.setSummary(context.getString(R.string.play_sound_desc));
+    				return false;
+    			}
+    			
                 try {
                     String notificationUri = settings.getString("NotificationUri", "android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell);
-					player.setDataSource(TimerPrefActivity.this, Uri.parse(notificationUri));
+					player.reset();
+                    player.setDataSource(context, Uri.parse(notificationUri));
 	                player.prepare();
+	                player.setLooping(false);
+	                player.setOnCompletionListener(new OnCompletionListener(){
+						@Override
+						public void onCompletion(MediaPlayer mp) {
+		    				preference.setTitle(context.getString(R.string.play_sound));
+		    				preference.setSummary(context.getString(R.string.play_sound_desc));
+						}
+	                });
 	                player.start();
-				} catch (IOException e) {
+                } catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				preference.setTitle(context.getString(R.string.playing_sound));
+				preference.setSummary(context.getString(R.string.playing_sound_desc));
+				
                 return false;
 			}
 
     	});
+    	
         Preference about = (Preference)findPreference("aboutPref");
 
         about.setOnPreferenceClickListener(new OnPreferenceClickListener() {
@@ -134,7 +160,22 @@ public class TimerPrefActivity extends PreferenceActivity
 			}
 
     	});
-    	    	
+
+        Preference full = (Preference)findPreference("FULLSCREEN");
+        
+        full.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				
+				if(newValue.toString().equals("true"))
+					getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
+		    	else
+		        	getWindow().clearFlags(LayoutParams.FLAG_FULLSCREEN); 				
+				return true;
+			}
+
+    	});
+        
     }
     static private CharSequence [] concat( CharSequence[] A, CharSequence[] B) 
     {		
@@ -143,5 +184,15 @@ public class TimerPrefActivity extends PreferenceActivity
     	System.arraycopy(B, 0, C, A.length, B.length);
 
     	   return C;
-    	}
+	}
+    
+    @Override
+    public void onResume() {
+		if(settings.getBoolean("FULLSCREEN", false))
+			getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
+    	else
+        	getWindow().clearFlags(LayoutParams.FLAG_FULLSCREEN); 
+
+		super.onResume();
+    }
 }
