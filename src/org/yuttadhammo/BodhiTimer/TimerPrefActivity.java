@@ -79,8 +79,8 @@ public class TimerPrefActivity extends PreferenceActivity
 	        cursor.close();   
 		}
         
-    	CharSequence [] entries = {"No Sound","Three Bells","Gong","Singing Bowl"};
-    	CharSequence [] entryValues = {"","android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.gong,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bowl};
+    	CharSequence [] entries = {"No Sound","Three Bells","One Bell","Gong","Singing Bowl"};
+    	CharSequence [] entryValues = {"","android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell1,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.gong,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bowl};
     	
     	//Default value
     	if(tone.getValue() == null) tone.setValue((String)entryValues[1]);
