@@ -32,6 +32,7 @@ public class TimerPrefActivity extends PreferenceActivity
 	private SharedPreferences settings;
 	private Context context;
 	private MediaPlayer player;
+	private Preference play;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,8 @@ public class TimerPrefActivity extends PreferenceActivity
         
         // Load the sounds
         ListPreference tone = (ListPreference)findPreference("NotificationUri");
-        	
+        play = (Preference)findPreference("playSound");
+       	
     	String [] cols = { MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE};
     	
     	// Lets check out the media provider
@@ -94,9 +96,21 @@ public class TimerPrefActivity extends PreferenceActivity
     		tone.setEntryValues(entryValues);
     	}
 
-        player = new MediaPlayer();
+    	player = new MediaPlayer();
+    	
+    	tone.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+			
+    		@Override
+			public boolean onPreferenceClick(final Preference preference) {
+    	    	if(player.isPlaying()) {
+    				play.setTitle(context.getString(R.string.play_sound));
+    				play.setSummary(context.getString(R.string.play_sound_desc));
+    	    		player.stop();      
+    	    	}
+    	    	return false;
+			}
 
-        Preference play = (Preference)findPreference("playSound");
+    	});
 
     	play.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			
@@ -185,7 +199,15 @@ public class TimerPrefActivity extends PreferenceActivity
 
     	   return C;
 	}
-    
+    @Override
+    public void onPause() {
+    	if(player.isPlaying()) {
+    		player.stop();
+			play.setTitle(context.getString(R.string.play_sound));
+			play.setSummary(context.getString(R.string.play_sound_desc));
+    	}
+		super.onPause();
+    }    
     @Override
     public void onResume() {
 		if(settings.getBoolean("FULLSCREEN", false))
