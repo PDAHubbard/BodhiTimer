@@ -13,7 +13,6 @@
 		<Preference
                 android:title="@string/play_sound"
                 android:summary="@string/play_sound_desc"
-                android:icon="@drawable/play"
                 android:key="playSound" />				
         <CheckBoxPreference
                 android:key="Vibrate"
