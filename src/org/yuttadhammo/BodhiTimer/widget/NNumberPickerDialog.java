@@ -50,7 +50,7 @@ public class NNumberPickerDialog extends AlertDialog implements OnClickListener 
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.n_number_picker_dialog, null);
         setView(view);
-
+        
         LayoutParams npLayout = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
         npLayout.gravity = 1;

@@ -49,6 +49,9 @@
 	<string name="nag_dialog">Popup Dialog</string>
 	<string name="nag_dialog_desc">When the phone is set to silent show a popup dialog.</string>
 	
+	<string name="repeat_timer">Repeat Timer</string>
+	<string name="repeat_timer_desc">Restart timer automatically on finish.</string>
+		
 	<string name="stay_awake">Stay awake</string>
 	<string name="stay_awake_desc">Don\'t allow the phone to go to sleep.</string>
 

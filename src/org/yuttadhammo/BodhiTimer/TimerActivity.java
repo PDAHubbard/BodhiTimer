@@ -25,16 +25,14 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 // import android.net.Uri;
 import android.os.Bundle;
@@ -46,9 +44,6 @@ import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
@@ -63,14 +58,14 @@ import android.widget.Toast;
 public class TimerActivity extends Activity implements OnClickListener,OnNNumberPickedListener,OnSharedPreferenceChangeListener
 {
 	/** All possible timer states */
-	private final static int RUNNING=0, STOPPED=1, PAUSED=2;
+	final static int RUNNING=0;
+
+	private static final int STOPPED=1;
+
+	private static final int PAUSED=2;
 	
 	/** Should the logs be shown */
 	private final static boolean LOG = true;
-	
-	/** Menu item ids */
-	private final static int PREF=0;
-	private final static int ABOUT=1;
 	
 	/** Macros for our dialogs */
 	private final static int NUM_PICKER_DIALOG = 0, ALERT_DIALOG = 1;
@@ -107,10 +102,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 					Context context = getApplicationContext();
 					CharSequence text = getResources().getText(R.string.Notification);
 					Toast.makeText(context, text,Toast.LENGTH_SHORT).show();
-					
 					timerStop();
-
-					
 				}
 				
 			// Update the time
@@ -141,7 +133,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 	private WakeLock mWakeLock;
     
-	// for cancelling notifications
+	// for canceling notifications
 	
 	private NotificationManager mNM;
 	
@@ -153,10 +145,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     {    	
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
 
-
-		mCancelButton = (ImageButton)findViewById(R.id.cancelButton);
+        mCancelButton = (ImageButton)findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(this);
         
 		mSetButton = (ImageButton)findViewById(R.id.setButton);
@@ -371,6 +361,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		
 		mLastTime = hour*60*60*1000 + min*60*1000 + sec*1000;
 		
+		// put last set time to prefs
+		
+		Editor mSettingsEdit = mSettings.edit();
+		mSettingsEdit.putInt("LAST_SET_TIME", mLastTime);
+		mSettingsEdit.commit();
+		
 		// Check to make sure the phone isn't set to silent
 		boolean silent = (mAudioMgr.getRingerMode() == AudioManager.RINGER_MODE_SILENT);
 		String noise = mSettings.getString("NotificationUri","");
@@ -396,6 +392,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		
 		if(mCurrentState != state){
 			
+			setButtonAlpha(255);
 			mCurrentState = state;		
 			if(LOG) Log.v(TAG,"Set current state = " + mCurrentState);
 			
@@ -407,6 +404,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 					mCancelButton.setVisibility(View.VISIBLE);
 					mPauseButton.setVisibility(View.VISIBLE);
 					mPauseButton.setImageBitmap(mPauseBitmap);
+					setButtonAlpha(127);
 				}break;
 		
 				case STOPPED:
@@ -429,6 +427,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		}
 	}
 	
+	private void setButtonAlpha(int i) {
+		mPauseButton.setAlpha(i);		
+		mCancelButton.setAlpha(i);		
+		mPrefButton.setAlpha(i);		
+	}
+
 	/**
 	 * Cancels the alarm portion of the timer
 	 */
@@ -489,14 +493,14 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	{
 		if(LOG) Log.v(TAG,"Starting the timer...");
 		
-		// Star external service
 		enterState(RUNNING);
 		
+		// Start external service
 		if(service){
 		    if(LOG) Log.v(TAG,"Starting the timer service ...");
 		    Intent intent = new Intent( getApplicationContext(), TimerReceiver.class);
 		    intent.putExtra("SetTime",mLastTime);
-		    mPendingIntent = PendingIntent.getBroadcast( getApplicationContext(), 0 , intent, PendingIntent.FLAG_CANCEL_CURRENT);
+		    mPendingIntent = PendingIntent.getBroadcast( getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 		    mAlarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + time, mPendingIntent);	    
 		}
 		
@@ -558,6 +562,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	/** {@inheritDoc} */
 	public void onClick(View v) 
 	{
+		if(mCurrentState == STOPPED)
+			mNM.cancelAll();
+		
 		switch(v.getId()){
 		
 			case R.id.setButton:
@@ -586,6 +593,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			
 			case R.id.cancelButton:
 			{
+				mNM.cancelAll();
+			    Intent intent = new Intent( getApplicationContext(), TimerReceiver.class);
+			    mPendingIntent = PendingIntent.getBroadcast( getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+				
 				// We need to be careful to not cancel timers
 				// that are not running (e.g. if we're paused)
 				switch(mCurrentState){

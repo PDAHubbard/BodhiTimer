@@ -52,7 +52,7 @@
     
     
     <PreferenceCategory android:title="@string/misc">
-             <CheckBoxPreference
+        <CheckBoxPreference
                 android:key="NagSilent"
                 android:title="@string/nag_dialog"
                 android:summary="@string/nag_dialog_desc" 
