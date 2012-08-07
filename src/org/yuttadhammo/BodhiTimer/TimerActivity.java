@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -48,6 +49,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -140,11 +142,17 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	/** Called when the activity is first created.
      *	{ @inheritDoc} 
      */
-    @Override
+    @SuppressLint("NewApi")
+	@Override
     public void onCreate(Bundle savedInstanceState)
     {    	
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        RelativeLayout main = (RelativeLayout)findViewById(R.id.mainLayout);
+        
+        if(Integer.parseInt(android.os.Build.VERSION.SDK) >= 11) {
+            main.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
+        }
 
         mCancelButton = (ImageButton)findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(this);

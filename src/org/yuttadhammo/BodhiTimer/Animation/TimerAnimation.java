@@ -86,7 +86,7 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 		mIndex %= mDrawings.size();
 		
 		startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in));
-	
+		
 		invalidate();
 	}
 	
