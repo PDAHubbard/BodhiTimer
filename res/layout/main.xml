@@ -13,6 +13,7 @@
 		android:gravity="center"
 		android:adjustViewBounds="true"
 		android:scaleType="centerInside"
+		android:layout_margin="20dp"
 	/>
     
     
