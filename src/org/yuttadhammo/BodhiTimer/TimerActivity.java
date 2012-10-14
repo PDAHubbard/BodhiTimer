@@ -49,7 +49,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -148,10 +147,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     {    	
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        RelativeLayout main = (RelativeLayout)findViewById(R.id.mainLayout);
+        //RelativeLayout main = (RelativeLayout)findViewById(R.id.mainLayout);
         
         if(Integer.parseInt(android.os.Build.VERSION.SDK) >= 11) {
-            main.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
+        	this.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
         }
 
         mCancelButton = (ImageButton)findViewById(R.id.cancelButton);
@@ -237,10 +236,20 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
    
 
     /** {@inheritDoc} */
-    @Override 
+    @SuppressLint("NewApi")
+	@Override 
     public void onResume()
     {
     	super.onResume();
+		
+    	if(mCurrentState == STOPPED)
+			mNM.cancelAll();
+        
+    	if(Integer.parseInt(android.os.Build.VERSION.SDK) >= 11) {
+	    	View rootView = getWindow().getDecorView();
+	    	rootView.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
+	    	rootView.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
+        }
 
     	if(mSettings.getBoolean("FULLSCREEN", false))
 			getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
@@ -338,7 +347,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		switch(id){
 		
 			case NUM_PICKER_DIALOG:
-				d = new NNumberPickerDialog(	this, this, getResources().getString(R.string.InputTitle));
+				d = new NNumberPickerDialog(this, this, getResources().getString(R.string.InputTitle));
 				break;
 			
 			case ALERT_DIALOG:

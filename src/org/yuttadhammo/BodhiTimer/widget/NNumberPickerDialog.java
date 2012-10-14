@@ -3,18 +3,19 @@ package org.yuttadhammo.BodhiTimer.widget;
 import org.yuttadhammo.BodhiTimer.R;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import android.widget.Button;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.Gallery;
 import android.widget.ArrayAdapter;
 
 /** Dialog box with an arbitrary number of number pickers */
-public class NNumberPickerDialog extends AlertDialog implements OnClickListener {
+public class NNumberPickerDialog extends Dialog {
 
     public interface OnNNumberPickedListener {
         void onNumbersPicked(int[] number);
@@ -29,7 +30,7 @@ public class NNumberPickerDialog extends AlertDialog implements OnClickListener 
 	private Gallery hour;
 	private Gallery min;
 	private Gallery sec;
-
+	
     /** Instantiate the dialog box.
      *
      * @param context
@@ -39,22 +40,16 @@ public class NNumberPickerDialog extends AlertDialog implements OnClickListener 
     public NNumberPickerDialog(Context context, OnNNumberPickedListener callBack,
             String title)
     {
-        super(context);
+        super(context, R.style.NPTheme);
         
         mCallback = callBack;
         
-        setButton(context.getText(android.R.string.ok), this);
-        setButton2(context.getText(android.R.string.cancel), (OnClickListener) null);
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.n_number_picker_dialog, null);
-        setView(view);
+        setContentView(view);
         
-        LayoutParams npLayout = new LayoutParams(LayoutParams.WRAP_CONTENT,
-                LayoutParams.MATCH_PARENT);
-        npLayout.gravity = 1;
-
 		String [] numbers = new String[61];
 		for(int i = 0; i < 61; i++) {
 			numbers[i] = Integer.toString(i);
@@ -68,19 +63,32 @@ public class NNumberPickerDialog extends AlertDialog implements OnClickListener 
 		hour.setAdapter(adapter1);
 		min.setAdapter(adapter1);
 		sec.setAdapter(adapter1);
-	}
+		
+		Button cancel = (Button) findViewById(R.id.btnCancel);
+		Button ok = (Button) findViewById(R.id.btnOk);
+		cancel.setOnClickListener(new View.OnClickListener(){
 
+			@Override
+			public void onClick(View v) {
+				dismiss();
+			}
+		});
+		ok.setOnClickListener(new View.OnClickListener(){
 
-
-    public void onClick(DialogInterface dialog, int which) {
-        if (mCallback != null) {
-			
-			hsel = hour.getSelectedItemPosition();
-			msel = min.getSelectedItemPosition();
-			ssel = sec.getSelectedItemPosition();
-			
-            int[] values = {hsel,msel,ssel};
-            mCallback.onNumbersPicked(values);
-        }
+			@Override
+			public void onClick(View v) {
+		        if (mCallback != null) {
+					
+					hsel = hour.getSelectedItemPosition();
+					msel = min.getSelectedItemPosition();
+					ssel = sec.getSelectedItemPosition();
+					
+		            int[] values = {hsel,msel,ssel};
+		            mCallback.onNumbersPicked(values);
+		        }
+		        dismiss();
+			}
+		});
     }
+
 }
