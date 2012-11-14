@@ -55,6 +55,8 @@ public class TimerReceiver extends BroadcastReceiver
         if(vibrate){
         	notification.defaults = Notification.DEFAULT_VIBRATE;    	
         }
+        else
+        	notification.defaults = 0;    	
         
         // Have a light
         if(led){
