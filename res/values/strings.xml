@@ -30,8 +30,8 @@
 	<string name="notification_vibrate">Notification Vibrate</string>
 	<string name="notification_vibrate_desc">Cause the timer to trigger vibration.</string>
 	
-	<string name="led_Notification">LED Notification</string>
-	<string name="led_Notification_desc">Blink LED light during notification.</string>
+	<string name="led_notification">LED Notification</string>
+	<string name="led_notification_desc">Blink LED light during notification.</string>
 
 	<string name="auto_clear">Clear automatically</string>
 	<string name="auto_clear_desc">Clear notification automatically after a few seconds.</string>
@@ -43,7 +43,10 @@
 	
 	<string name="fullscreen">Full Screen</string>
 	<string name="fullscreen_desc">Hide the status bar when running</string>
-		
+	
+	<string name="hide_time">Hide Time</string>
+	<string name="hide_time_desc">don\'t show time left</string>
+	
 	<string name="misc">Misc</string>
 	
 	<string name="nag_dialog">Popup Dialog</string>
@@ -55,6 +58,9 @@
 	<string name="stay_awake">Stay awake</string>
 	<string name="stay_awake_desc">Don\'t allow the phone to go to sleep.</string>
 
+	<string name="override_sound">Force Custom Sound</string>
+	<string name="override_sound_desc">use this only if you are not able to set a custom sound for the timer</string>
+		
 	<string name="about_desc">About Bodhi Timer</string>
 	
 	

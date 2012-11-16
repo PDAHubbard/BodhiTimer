@@ -1,5 +1,7 @@
 package org.yuttadhammo.BodhiTimer;
 
+import java.io.IOException;
+
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -24,12 +26,14 @@ public class TimerReceiver extends BroadcastReceiver
 	@Override
 	public void onReceive(Context context, Intent pintent) 
     {
+        MediaPlayer player = new MediaPlayer();
 
 		NotificationManager mNM = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         // Cancel notification and return...
         if (CANCEL_NOTIFICATION.equals(pintent.getAction())) {
             Log.v(TAG,"Cancelling notification...");
+            player.stop();
             mNM.cancel(0);
             return;
         }
@@ -60,7 +64,7 @@ public class TimerReceiver extends BroadcastReceiver
         // Play a sound!
         if(notificationUri != ""){
 			uri = Uri.parse(notificationUri);
-	      	mBuilder.setSound(uri);
+      		mBuilder.setSound(uri);
         }
 		
         // Vibrate
@@ -110,7 +114,7 @@ public class TimerReceiver extends BroadcastReceiver
             // Determine duration of notification sound
             int duration = 5000;
             if (uri != null) {
-                MediaPlayer player = new MediaPlayer();
+                MediaPlayer cancelPlayer = new MediaPlayer();
                 try {
                     player.setDataSource(context, uri);
                     player.prepare();
@@ -132,8 +136,22 @@ public class TimerReceiver extends BroadcastReceiver
                          SystemClock.elapsedRealtime() + duration,
                          pendingCancelIntent);
         }
-		
-		
+
+      	if(settings.getBoolean("overrideSound", false)) {
+      		mBuilder.setSound(null);
+			player.reset();
+			
+	        try {
+				player.setDataSource(context, uri);
+		        player.prepare();
+		        player.setLooping(false);
+		        player.start();
+	        } catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+      	}
+        
 		// mId allows you to update the notification later on.
 		mNotificationManager.notify(0, mBuilder.build());
 		
