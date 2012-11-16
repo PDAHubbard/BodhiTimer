@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -140,6 +141,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	/** Called when the activity is first created.
      *	{ @inheritDoc} 
      */
+	@SuppressLint("NewApi")
 	@Override
     public void onCreate(Bundle savedInstanceState)
     {    	
@@ -185,6 +187,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         mNM = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
        
 		mSettings.registerOnSharedPreferenceChangeListener(this);
+		
+		if (mSettings.getBoolean("hideTime", false))
+			mTimerLabel1.setVisibility(View.INVISIBLE);
 
 		if(mSettings.getBoolean("FULLSCREEN", false))
 				getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
@@ -234,6 +239,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
    
 
     /** {@inheritDoc} */
+	@SuppressLint("NewApi")
 	@Override 
     public void onResume()
     {

@@ -22,8 +22,8 @@
         
         <CheckBoxPreference
                 android:key="LED"
-                android:title="@string/led_Notification"
-                android:summary="@string/led_Notification_desc" 
+                android:title="@string/led_notification"
+                android:summary="@string/led_notification_desc" 
                 android:defaultValue="True" />
 
         <CheckBoxPreference
@@ -44,28 +44,38 @@
 			android:defaultValue="3"
 			android:entryValues="@array/themeValues" />
         <CheckBoxPreference
-                android:key="FULLSCREEN"
-                android:title="@string/fullscreen"
-                android:summary="@string/fullscreen_desc" 
-                android:defaultValue="False" />			
+			android:key="FULLSCREEN"
+			android:title="@string/fullscreen"
+			android:summary="@string/fullscreen_desc" 
+			android:defaultValue="False" />
+        <CheckBoxPreference
+			android:key="hideTime"
+			android:title="@string/hide_time"
+			android:summary="@string/hide_time_desc" 
+			android:defaultValue="False" />	        
     </PreferenceCategory>
     
     
     <PreferenceCategory android:title="@string/misc">
         <CheckBoxPreference
-                android:key="NagSilent"
-                android:title="@string/nag_dialog"
-                android:summary="@string/nag_dialog_desc" 
-                android:defaultValue="True" />
-             <CheckBoxPreference
-                android:key="WakeLock"
-                android:title="@string/stay_awake"
-                android:summary="@string/stay_awake_desc" 
-                android:defaultValue="False" />
+			android:key="NagSilent"
+			android:title="@string/nag_dialog"
+			android:summary="@string/nag_dialog_desc" 
+			android:defaultValue="True" />
+		<CheckBoxPreference
+			android:key="WakeLock"
+			android:title="@string/stay_awake"
+			android:summary="@string/stay_awake_desc" 
+			android:defaultValue="False" />
+		<CheckBoxPreference
+			android:key="overrideSound"
+			android:title="@string/override_sound"
+			android:summary="@string/override_sound_desc" 
+			android:defaultValue="False" />
 		<Preference
-                android:title="@string/about"
-                android:summary="@string/about_desc"
-                android:key="aboutPref" />	
+			android:title="@string/about"
+			android:summary="@string/about_desc"
+			android:key="aboutPref" />	
 	</PreferenceCategory>
     
  
