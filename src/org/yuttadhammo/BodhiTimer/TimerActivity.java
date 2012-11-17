@@ -187,12 +187,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         mNM = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
        
 		mSettings.registerOnSharedPreferenceChangeListener(this);
-		
-		if (mSettings.getBoolean("hideTime", false))
-			mTimerLabel1.setVisibility(View.INVISIBLE);
-
-		if(mSettings.getBoolean("FULLSCREEN", false))
-				getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
     }
 
 	/** { @inheritDoc} */
@@ -244,6 +238,14 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     public void onResume()
     {
     	super.onResume();
+        mSettings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+		if (mSettings.getBoolean("hideTime", false))
+			mTimerLabel1.setVisibility(View.INVISIBLE);
+		else
+			mTimerLabel1.setVisibility(View.VISIBLE);
+
+		if(mSettings.getBoolean("FULLSCREEN", false))
+				getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
 		
     	if(mCurrentState == STOPPED)
 			mNM.cancelAll();

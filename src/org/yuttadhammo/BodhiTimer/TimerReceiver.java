@@ -53,7 +53,17 @@ public class TimerReceiver extends BroadcastReceiver
         boolean led = settings.getBoolean("LED",true);
         boolean vibrate = settings.getBoolean("Vibrate",true);
         String notificationUri = settings.getString("NotificationUri", "android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell);
+		
+        Log.v(TAG,"notification uri: "+notificationUri);
 
+		if(notificationUri.equals("system"))
+			notificationUri = settings.getString("SystemUri", "");
+		else if(notificationUri.equals("file"))
+			notificationUri = settings.getString("FileUri", "");
+
+
+		Log.v(TAG,"notification uri: "+notificationUri);
+		
 		NotificationCompat.Builder mBuilder =
 		        new NotificationCompat.Builder(context)
 		        .setSmallIcon(R.drawable.notification)
