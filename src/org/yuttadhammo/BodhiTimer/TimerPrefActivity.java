@@ -122,6 +122,8 @@ public class TimerPrefActivity extends PreferenceActivity
                     String notificationUri = settings.getString("NotificationUri", "android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell);
 					if(notificationUri.equals("system"))
 						notificationUri = settings.getString("SystemUri", "");
+					else if(notificationUri.equals("file"))
+						notificationUri = settings.getString("FileUri", "");
                     player.reset();
                     player.setDataSource(context, Uri.parse(notificationUri));
                     player.prepare();
@@ -188,14 +190,7 @@ public class TimerPrefActivity extends PreferenceActivity
     	});
         
     }
-    static private CharSequence [] concat( CharSequence[] A, CharSequence[] B) 
-    {		
-    	CharSequence[] C= new CharSequence[A.length+B.length];
-    	System.arraycopy(A, 0, C, 0, A.length);
-    	System.arraycopy(B, 0, C, A.length, B.length);
 
-    	   return C;
-	}
     @Override
     public void onPause() {
     	if(player.isPlaying()) {
@@ -224,18 +219,21 @@ public class TimerPrefActivity extends PreferenceActivity
         {
         	uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
             Log.i("Timer","Got ringtone "+uri.toString()); 
-
+        	if (uri != null)
+        		mSettingsEdit.putString("SystemUri", uri.toString());
+        	else
+        		mSettingsEdit.putString("SystemUri", "");
          }
         else if (resultCode == Activity.RESULT_OK && requestCode == 10) {
             // Get the Uri of the selected file 
             uri = intent.getData();
             Log.d(TAG, "File Path: " + uri);
-
+        	if (uri != null)
+        		mSettingsEdit.putString("FileUri", uri.toString());
+        	else
+        		mSettingsEdit.putString("FileUri", "");
         }
-    	if (uri != null)
-    		mSettingsEdit.putString("FileUri", uri.toString());
-    	else
-    		mSettingsEdit.putString("FileUri", "");
+
 		mSettingsEdit.commit();  
      }
 }
