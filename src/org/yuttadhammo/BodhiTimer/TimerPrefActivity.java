@@ -2,16 +2,24 @@ package org.yuttadhammo.BodhiTimer;
 
 
 import java.io.IOException;
+
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
@@ -19,15 +27,18 @@ import android.preference.PreferenceManager;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager.LayoutParams;
+import android.widget.Toast;
 
 public class TimerPrefActivity extends PreferenceActivity 
 {
 	private static final String TAG = TimerPrefActivity.class.getSimpleName();
 	private SharedPreferences settings;
 	private Context context;
+	private static Activity activity;
 	private MediaPlayer player;
 	private Preference play;
 	
@@ -36,6 +47,7 @@ public class TimerPrefActivity extends PreferenceActivity
         super.onCreate(savedInstanceState);
         
         context = this;
+        activity = this;
 
         settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		if(settings.getBoolean("FULLSCREEN", false))
@@ -47,64 +59,50 @@ public class TimerPrefActivity extends PreferenceActivity
         // Load the sounds
         ListPreference tone = (ListPreference)findPreference("NotificationUri");
         play = (Preference)findPreference("playSound");
-       	
-    	String [] cols = { MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE};
     	
-    	// Lets check out the media provider
-        Cursor cursor = managedQuery(MediaStore.Audio.Media.INTERNAL_CONTENT_URI, 
-        		cols, 
-        		"is_ringtone OR is_notification",
-        		null, "is_ringtone, title_key");
-         int i=0;
-   
-         CharSequence[] items = null;
-         CharSequence[] itemUris = null;
-         
-        if(cursor != null && cursor.getCount() > 0){
-        	
-            items = new CharSequence[cursor.getCount()];
-            itemUris = new CharSequence[cursor.getCount()];
-        
-        	int colTitle = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);;
-        	int colId = cursor.getColumnIndex(MediaStore.Audio.Media._ID);;
-	        
-        	while(!cursor.isLast()){
-	        	cursor.moveToNext();
-	        	items[i] = cursor.getString(colTitle);
-	        	itemUris[i] = MediaStore.Audio.Media.INTERNAL_CONTENT_URI + "/" + cursor.getLong(colId);
-	        	i++;
-        	}
-        
-	        cursor.close();   
-		}
-        
-    	CharSequence [] entries = {"No Sound","Three Bells","One Bell","Gong","Singing Bowl"};
-    	CharSequence [] entryValues = {"","android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell1,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.gong,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bowl};
+    	CharSequence [] entries = {"No Sound","Three Bells","One Bell","Gong","Singing Bowl","System Tone","Sound File"};
+    	CharSequence [] entryValues = {"","android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell1,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.gong,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bowl,"system","file"};
     	
     	//Default value
     	if(tone.getValue() == null) tone.setValue((String)entryValues[1]);
     	tone.setDefaultValue((String)entryValues[1]);
     	
-    	if( items != null && items.length > 0){
-    		tone.setEntries(concat(entries,items));
-    		tone.setEntryValues(concat(entryValues,itemUris));
-    	}else{
-    		tone.setEntries(entries);
-    		tone.setEntryValues(entryValues);
-    	}
-
+		tone.setEntries(entries);
+		tone.setEntryValues(entryValues);
+		
     	player = new MediaPlayer();
     	
-    	tone.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+    	tone.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 			
-    		@Override
-			public boolean onPreferenceClick(final Preference preference) {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
     	    	if(player.isPlaying()) {
     				play.setTitle(context.getString(R.string.play_sound));
     				play.setSummary(context.getString(R.string.play_sound_desc));
     	    		player.stop();      
     	    	}
-    	    	return false;
+    	    	if(newValue.toString().equals("system")) {
+    	    		Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+    	    		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL);
+    	    		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Tone");
+    	    		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
+    	    		activity.startActivityForResult(intent, 5);
+    	    	}
+    	    	else if(newValue.toString().equals("file")) {
+
+    	            Intent intent = new Intent(Intent.ACTION_GET_CONTENT); 
+    	            intent.setType("audio/*"); 
+    	            intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    	            try {
+    	            	activity.startActivityForResult(Intent.createChooser(intent, "Select Sound File"), 10);
+    	            } 
+    	            catch (ActivityNotFoundException ex) {
+    	                Toast.makeText(activity, "Please install a File Manager.", 
+    	                        Toast.LENGTH_SHORT).show();
+    	            }
+    	        }
+				return true;
 			}
 
     	});
@@ -122,9 +120,11 @@ public class TimerPrefActivity extends PreferenceActivity
     			
                 try {
                     String notificationUri = settings.getString("NotificationUri", "android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell);
-					player.reset();
+					if(notificationUri.equals("system"))
+						notificationUri = settings.getString("SystemUri", "");
+                    player.reset();
                     player.setDataSource(context, Uri.parse(notificationUri));
-	                player.prepare();
+                    player.prepare();
 	                player.setLooping(false);
 	                player.setOnCompletionListener(new OnCompletionListener(){
 						@Override
@@ -214,4 +214,28 @@ public class TimerPrefActivity extends PreferenceActivity
 
 		super.onResume();
     }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent intent)
+    {
+        Uri uri = null;
+        Editor mSettingsEdit = settings.edit();
+		if (resultCode == Activity.RESULT_OK && requestCode == 5)
+        {
+        	uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+            Log.i("Timer","Got ringtone "+uri.toString()); 
+
+         }
+        else if (resultCode == Activity.RESULT_OK && requestCode == 10) {
+            // Get the Uri of the selected file 
+            uri = intent.getData();
+            Log.d(TAG, "File Path: " + uri);
+
+        }
+    	if (uri != null)
+    		mSettingsEdit.putString("FileUri", uri.toString());
+    	else
+    		mSettingsEdit.putString("FileUri", "");
+		mSettingsEdit.commit();  
+     }
 }
