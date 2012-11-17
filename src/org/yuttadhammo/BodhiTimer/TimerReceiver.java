@@ -126,16 +126,16 @@ public class TimerReceiver extends BroadcastReceiver
             if (uri != null) {
                 MediaPlayer cancelPlayer = new MediaPlayer();
                 try {
-                    player.setDataSource(context, uri);
-                    player.prepare();
-                    duration = Math.max(duration, player.getDuration() + 2000);
+                	cancelPlayer.setDataSource(context, uri);
+                	cancelPlayer.prepare();
+                    duration = Math.max(duration, cancelPlayer.getDuration() + 2000);
                 }
                 catch (java.io.IOException ex) {
                     Log.e(TAG, "Cannot get sound duration: " + ex);
                     duration = 30000; // on error, default to 30 seconds
                 }
                 finally {
-                    player.release();
+                	cancelPlayer.release();
                 }
             }
             Log.v(TAG, "Notification duration: " + duration + " ms");
@@ -149,7 +149,6 @@ public class TimerReceiver extends BroadcastReceiver
 
       	if(settings.getBoolean("overrideSound", false)) {
       		mBuilder.setSound(null);
-			player.reset();
 			
 	        try {
 				player.setDataSource(context, uri);
