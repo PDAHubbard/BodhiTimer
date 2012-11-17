@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -18,8 +19,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
-public class TimerReceiver extends BroadcastReceiver 
-{
+public class TimerReceiver extends BroadcastReceiver {
 	private final static String TAG = TimerReceiver.class.getSimpleName();
     private final static String CANCEL_NOTIFICATION = "CANCEL_NOTIFICATION";
 	
@@ -154,6 +154,15 @@ public class TimerReceiver extends BroadcastReceiver
 				player.setDataSource(context, uri);
 		        player.prepare();
 		        player.setLooping(false);
+		        player.setOnCompletionListener(new OnCompletionListener(){
+
+					@Override
+					public void onCompletion(MediaPlayer mp) {
+						// TODO Auto-generated method stub
+						mp.release();
+					}
+		        	
+		        });
 		        player.start();
 	        } catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -165,5 +174,4 @@ public class TimerReceiver extends BroadcastReceiver
 		mNotificationManager.notify(0, mBuilder.build());
 		
 	}
-
 }
