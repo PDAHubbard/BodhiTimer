@@ -45,8 +45,10 @@ import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -176,6 +178,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		mTimerAnimation = (TimerAnimation)findViewById(R.id.mainImage);
 		mTimerAnimation.setMaxHeight(mTimerAnimation.getMeasuredHeight());
 		mTimerAnimation.setMaxWidth(mTimerAnimation.getMeasuredWidth());
+		
+		mTimerAnimation.setOnClickListener(this);
 		
         enterState(STOPPED);
         
@@ -588,21 +592,20 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			mNM.cancelAll();
 		
 		switch(v.getId()){
-		
+			case R.id.mainImage:
+				Log.i("Timer","image clicked");
+				break;
 			case R.id.setButton:
-			{
 				showDialog(NUM_PICKER_DIALOG);		
-			}break;
+				break;
 
 			case R.id.prefButton:
-			{
 				Log.i("Timer","pref button clicked");
 				startActivity(new Intent(this, TimerPrefActivity.class));	
-			}break;
+				break;
 			
 			
 			case R.id.pauseButton:
-			{
 				switch(mCurrentState){
 					case RUNNING:
 						pauseTimer();
@@ -610,11 +613,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 					case PAUSED:
 						resumeTimer();
 						break;
-				}		
-			}break;
+				}
+				break;
 			
 			case R.id.cancelButton:
-			{
 				mNM.cancelAll();
 			    Intent intent = new Intent( getApplicationContext(), TimerReceiver.class);
 			    mPendingIntent = PendingIntent.getBroadcast( getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -631,7 +633,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 						enterState(STOPPED);
 						break;
 				}	
-			}break;
+				break;
 		}
 	}
 	
