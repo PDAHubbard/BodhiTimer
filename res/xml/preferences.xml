@@ -35,7 +35,12 @@
     </PreferenceCategory>
     
     <PreferenceCategory android:title="@string/visual">
-    
+ 		<CheckBoxPreference
+			android:title="@string/custom_bmp"
+			android:key="custom_bmp" /> 
+        <Preference
+			android:title="@string/bmp_url"
+			android:key="bmp_url" />   
 	    <ListPreference
 			android:title="@string/color_theme"
 			android:summary="@string/color_theme_desc"

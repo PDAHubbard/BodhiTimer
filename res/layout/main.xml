@@ -13,7 +13,6 @@
 		android:gravity="center"
 		android:adjustViewBounds="true"
 		android:scaleType="centerInside"
-		android:layout_margin="20dp"
 	/>
     
     
@@ -22,7 +21,7 @@
 	    android:layout_width="match_parent" 
 	    android:layout_height="match_parent" 
 		android:text=""
-		android:textSize="50dp"
+		android:textSize="50sp"
 		android:gravity="center" 
 		/>
 	<ImageButton 

@@ -1,7 +1,9 @@
 package org.yuttadhammo.BodhiTimer.Animation;
 
 import org.yuttadhammo.BodhiTimer.R;
+import org.yuttadhammo.BodhiTimer.TimerActivity;
 
+import java.io.FileNotFoundException;
 import java.util.Vector;
 
 import android.content.Context;
@@ -25,6 +27,7 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 	Bitmap mBitmap = null;
 	
 	Context mContext;
+	private TimerActivity mActivity;
 	
 	public interface TimerDrawing{
 		
@@ -38,22 +41,27 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 		public void configure();
 	}
 	
-	public TimerAnimation(Context context, AttributeSet attrs){
+	public void setActivity(TimerActivity activity) {
+		mActivity = activity;
+	}
+	
+	public TimerAnimation(Context context, AttributeSet attrs) throws FileNotFoundException{
 		
 		super(context, attrs);
 		mContext = context;
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
 		prefs.registerOnSharedPreferenceChangeListener(this);
-				
-		mDrawings = new Vector<TimerDrawing>();
-		mDrawings.add(new Teapot(context));
-		mDrawings.add(new CircleAnimation(context));
-		//mDrawings.add(new TrashCupAnimation(context));
 		
 		setOnClickListener(this);
 	}
 
+	public void resetAnimationList() throws FileNotFoundException {
+		mDrawings = new Vector<TimerDrawing>();
+		mDrawings.add(new BodhiLeaf(mContext));
+		mDrawings.add(new CircleAnimation(mContext));
+	}
+	
 	/**
 	 * TODO eventually we'll want to move this index into the preferences
 	 * @param i
@@ -79,7 +87,8 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 	}
 	
 	public void onClick(View v){
-			
+		if(mActivity.mCurrentState == TimerActivity.STOPPED)
+			mActivity.mNM.cancelAll();
 		startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_out));
 		
 		mIndex++;
