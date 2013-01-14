@@ -20,6 +20,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
@@ -41,6 +42,9 @@ public class TimerPrefActivity extends PreferenceActivity
 	private static Activity activity;
 	private MediaPlayer player;
 	private Preference play;
+	private int SELECT_RINGTONE = 123;
+	private int SELECT_PHOTO = 456;
+	private int SELECT_FILE;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +90,7 @@ public class TimerPrefActivity extends PreferenceActivity
     	    		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL);
     	    		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Tone");
     	    		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
-    	    		activity.startActivityForResult(intent, 5);
+    	    		activity.startActivityForResult(intent, SELECT_RINGTONE);
     	    	}
     	    	else if(newValue.toString().equals("file")) {
 
@@ -95,7 +99,7 @@ public class TimerPrefActivity extends PreferenceActivity
     	            intent.addCategory(Intent.CATEGORY_OPENABLE);
 
     	            try {
-    	            	activity.startActivityForResult(Intent.createChooser(intent, "Select Sound File"), 10);
+    	            	activity.startActivityForResult(Intent.createChooser(intent, "Select Sound File"), SELECT_FILE);
     	            } 
     	            catch (ActivityNotFoundException ex) {
     	                Toast.makeText(activity, "Please install a File Manager.", 
@@ -174,7 +178,39 @@ public class TimerPrefActivity extends PreferenceActivity
 
     	});
 
-        Preference full = (Preference)findPreference("FULLSCREEN");
+        final Preference bmpUrl = (Preference)findPreference("bmp_url");
+        CheckBoxPreference customBmp = (CheckBoxPreference)findPreference("custom_bmp");
+        if(!customBmp.isChecked())
+        	bmpUrl.setEnabled(false);
+        
+        bmpUrl.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+
+			@Override
+			public boolean onPreferenceClick(Preference preference) {
+    			Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+    			photoPickerIntent.setType("image/*");
+    			startActivityForResult(photoPickerIntent, SELECT_PHOTO );
+	            return true;
+				   			
+			}
+
+    	});
+    	
+
+        customBmp.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				
+				if(newValue.toString().equals("true"))
+					bmpUrl.setEnabled(true);
+				else
+					bmpUrl.setEnabled(false);
+				return true;
+			}
+
+    	});
+        
+        CheckBoxPreference full = (CheckBoxPreference)findPreference("FULLSCREEN");
         
         full.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 			@Override
@@ -215,7 +251,7 @@ public class TimerPrefActivity extends PreferenceActivity
     {
         Uri uri = null;
         Editor mSettingsEdit = settings.edit();
-		if (resultCode == Activity.RESULT_OK && requestCode == 5)
+		if (resultCode == Activity.RESULT_OK && requestCode == SELECT_RINGTONE )
         {
         	uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
             Log.i("Timer","Got ringtone "+uri.toString()); 
@@ -223,8 +259,8 @@ public class TimerPrefActivity extends PreferenceActivity
         		mSettingsEdit.putString("SystemUri", uri.toString());
         	else
         		mSettingsEdit.putString("SystemUri", "");
-         }
-        else if (resultCode == Activity.RESULT_OK && requestCode == 10) {
+        }
+        else if (resultCode == Activity.RESULT_OK && requestCode == SELECT_FILE) {
             // Get the Uri of the selected file 
             uri = intent.getData();
             Log.d(TAG, "File Path: " + uri);
@@ -233,7 +269,14 @@ public class TimerPrefActivity extends PreferenceActivity
         	else
         		mSettingsEdit.putString("FileUri", "");
         }
-
+        else if (resultCode == Activity.RESULT_OK && requestCode == SELECT_PHOTO ){
+            uri = intent.getData();
+        	if (uri != null)
+        		mSettingsEdit.putString("bmp_url", uri.toString());
+        	else
+        		mSettingsEdit.putString("bmp_url", "");
+        }
 		mSettingsEdit.commit();  
-     }
+    }
+
 }

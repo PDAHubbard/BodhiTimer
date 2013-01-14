@@ -15,6 +15,7 @@ import org.yuttadhammo.BodhiTimer.Animation.TimerAnimation;
 import org.yuttadhammo.BodhiTimer.widget.NNumberPickerDialog;
 import org.yuttadhammo.BodhiTimer.widget.NNumberPickerDialog.OnNNumberPickedListener;
 
+import java.io.FileNotFoundException;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -63,7 +64,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	/** All possible timer states */
 	final static int RUNNING=0;
 
-	private static final int STOPPED=1;
+	public static final int STOPPED=1;
 
 	private static final int PAUSED=2;
 	
@@ -79,7 +80,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private final int TIMER_TIC = 100;
 	
 	/** The timer's current state */
-	private int mCurrentState = -1;
+	public int mCurrentState = -1;
 	
 	/** The maximum time */
 	private int mLastTime = 0;
@@ -138,7 +139,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     
 	// for canceling notifications
 	
-	private NotificationManager mNM;
+	public NotificationManager mNM;
 	
 	/** Called when the activity is first created.
      *	{ @inheritDoc} 
@@ -176,10 +177,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		mTimerLabel1 = (TextView)findViewById(R.id.text_top);
 
 		mTimerAnimation = (TimerAnimation)findViewById(R.id.mainImage);
-		mTimerAnimation.setMaxHeight(mTimerAnimation.getMeasuredHeight());
-		mTimerAnimation.setMaxWidth(mTimerAnimation.getMeasuredWidth());
-		
-		mTimerAnimation.setOnClickListener(this);
+		mTimerAnimation.setActivity(this);
 		
         enterState(STOPPED);
         
@@ -242,6 +240,13 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     public void onResume()
     {
     	super.onResume();
+    	try {
+			mTimerAnimation.resetAnimationList();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
         mSettings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		if (mSettings.getBoolean("hideTime", false))
 			mTimerLabel1.setVisibility(View.INVISIBLE);
@@ -592,9 +597,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			mNM.cancelAll();
 		
 		switch(v.getId()){
-			case R.id.mainImage:
-				Log.i("Timer","image clicked");
-				break;
 			case R.id.setButton:
 				showDialog(NUM_PICKER_DIALOG);		
 				break;

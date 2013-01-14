@@ -37,7 +37,10 @@
 	<string name="auto_clear_desc">Clear notification automatically after a few seconds.</string>
 	
 	<string name="visual">Visual</string>
-	
+
+	<string name="custom_bmp">Use Custom Image</string>
+	<string name="bmp_url">Choose Custom Image</string>
+			
 	<string name="color_theme">Circle Theme</string>
 	<string name="color_theme_desc">(Click on Bodhi leaf to toggle the circle animation)</string>
 	

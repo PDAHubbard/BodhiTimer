@@ -1,7 +1,11 @@
 package org.yuttadhammo.BodhiTimer.Animation;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 import org.yuttadhammo.BodhiTimer.R;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,8 +16,11 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.PorterDuff.Mode;
+import android.net.Uri;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
-class Teapot implements TimerAnimation.TimerDrawing
+class BodhiLeaf implements TimerAnimation.TimerDrawing
 {	
 	private Bitmap mCupBitmap;
 
@@ -22,22 +29,34 @@ class Teapot implements TimerAnimation.TimerDrawing
 	
 	private Paint mProgressPaint = null;
 
-	private Bitmap mBitmap = null;
+	private SharedPreferences prefs;
 
-	public Teapot(Context context)
+	private Context context;
+
+	public BodhiLeaf(Context context) throws FileNotFoundException
 	{
-		Resources resources = context.getResources();
-		
+		this.context = context;
 		mProgressPaint = new Paint();
 		mProgressPaint.setColor(Color.BLACK);
 		mProgressPaint.setAlpha(255);
 		mProgressPaint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
 		
-		mCupBitmap = BitmapFactory.decodeResource(resources, R.drawable.leaf);	
+		// get custom bitmap
+		prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		if(!prefs.getBoolean("custom_bmp", false) || prefs.getString("bmp_url","").length() == 0) {
+			Resources resources = context.getResources();
+			mCupBitmap = BitmapFactory.decodeResource(resources, R.drawable.leaf);
+		}
+		else {
+			String bmpUrl = prefs.getString("bmp_url", "");
+			Uri selectedImage = Uri.parse(bmpUrl);
+            InputStream imageStream = context.getContentResolver().openInputStream(selectedImage);
+            mCupBitmap = BitmapFactory.decodeStream(imageStream);
+		}
 		mHeight = mCupBitmap.getHeight();
 		mWidth = mCupBitmap.getWidth();
 
-		mBitmap = Bitmap.createBitmap(mWidth,mHeight,Bitmap.Config.ARGB_8888);
+		Bitmap.createBitmap(mWidth,mHeight,Bitmap.Config.ARGB_8888);
 	}
 
 	/**
@@ -53,16 +72,22 @@ class Teapot implements TimerAnimation.TimerDrawing
 		
 		Rect rs = new Rect(0, 0, mWidth, mHeight);
 		Rect rd;
+
+		int nWidth = mWidth;
+		int nHeight = mHeight;
 		
-		if(w < h) {
-			rd = new Rect(0,0,w,w);
-			canvas.translate(0,(h-w)/2);
+		if(mHeight/mWidth > h/w) { // image skinnier than canvas
+			nWidth = (int) (mWidth*((float)h/(float)mHeight));
+			int shift = (w-nWidth)/2;
+			rd = new Rect(shift,0,nWidth+shift,h);
 		}
-		else {
-			rd = new Rect(0,0,h,h);
-			canvas.translate((w-h)/2,0);
+		else { // image fatter than or equal to canvas
+			nHeight = (int) (mHeight*((float)w/(float)mWidth));
+			int shift = (h-nHeight)/2;
+			rd = new Rect(0,shift,w,nHeight+shift);
 		}
-		
+			
+		Log.i("Timer",nWidth+" "+nHeight+" "+w+" "+h);
 		
 		canvas.drawBitmap(mCupBitmap, rs, rd, null);
 		
@@ -74,6 +99,7 @@ class Teapot implements TimerAnimation.TimerDrawing
 		mProgressPaint.setAlpha((int)(255-(255*p)));
 		canvas.drawRect(fill,mProgressPaint);	
 		
+
 		canvas.restore();
 	}
 
