@@ -9,7 +9,7 @@
 
 	<string name="warning_text">Das Telefon ist im lautlosen Modus! Vibration und Töne werden unterdrückt!</string>
 	<string name="warning_title">Warnung</string>
-	<string name="warning_button">Ok</string>
+	<string name="warning_button">OK</string>
 	
 	<string name="timer_for">"Timer für "</string>
 	
@@ -17,39 +17,74 @@
 	
 	<!-- Preferences -->
 	<string name="notification">Benachrichtigung</string>
-	<string name="notification_sound">Benachrichtigungston</string>
-	<string name="notification_sound_desc">Der Ton der Benachrichtigung.</string>
-	
+	<string name="notification_sound">Timer-Ton</string>
+	<string name="notification_sound_desc">Ton der bei Ablauf des Timers gepielt wird.</string>
+
+	<string name="play_sound">Teste Ton</string>
+	<string name="play_sound_desc">Spielt den aktuellen Timer-Ton ab.</string>
+
+	<string name="playing_sound">Ton stoppen</string>
+	<string name="playing_sound_desc">Klicken um den aktuellen Ton zu stoppen.</string>
+
 	<string name="notification_vibrate">Vibration bei Benachrichtigung</string>
-	<string name="notification_vibrate_desc">Soll der der Timer vibrieren?</string>
+	<string name="notification_vibrate_desc">Vibriere bei Ablauf des Timers.</string>
 	
-	<string name="led_Notification">LED Benachrichtigung</string>
-	<string name="led_Notification_desc">Lässt die LED während der Benachrichtigung blinken.</string>
-	
+	<string name="led_notification">LED Benachrichtigung</string>
+	<string name="led_notification_desc">Lässt die LED während der Benachrichtigung blinken.</string>
+
+	<string name="auto_clear">Automatisch löschen</string>
+	<string name="auto_clear_desc">Benachrichtigung nach ein paar Sekunden automatisch löschen.</string>
+
 	<string name="visual">Erscheinungsbild</string>
 	
-	<string name="color_theme">Farben-Theme</string>
-	<string name="color_theme_desc">Wähle das Theme für die Anzeige.</string>
+	<string name="custom_bmp">Benutze individuelles Bild</string>
+	<string name="bmp_url">Individuelles Bild auswählen</string>
+
+	<string name="color_theme">Kreis Theme</string>
+	<string name="color_theme_desc">(Klick das Blatt des Bodhibaums um die Kreisanimation zu wechseln)</string>
+
+	<string name="fullscreen">Vollbild</string>
+	<string name="fullscreen_desc">Verstecke die Statusanzeige während das Programm läuft.</string>
+
+	<string name="hide_time">Zeit verstecken</string>
+	<string name="hide_time_desc">Nicht die verbleibende Zeit anzeigen.</string>
+
+	<string name="misc">Sonstiges</string>
 	
-	<string name="misc">Sonstige</string>
-	
-	<string name="nag_dialog">Nerfender Dialog</string>
-	<string name="nag_dialog_desc">Zeige einen nerfenden Dialog wenn lautlos.</string>
-	
-	<string name="stay_awake">Bildschirm anlassen</string>
-	<string name="stay_awake_desc">Das Telefon wird den Bildschrim nicht ausschalten.</string>
-		
+	<string name="nag_dialog">Popup-Fenster</string>
+	<string name="nag_dialog_desc">Zeige ein Popup-Fenster das Telefon auf lautlos gestellt ist.</string>
+
+	<string name="repeat_timer">Wiederhole Timer</string>
+	<string name="repeat_timer_desc">Setze Timer nach Ablauf automatisch zurück.</string>
+
+	<string name="stay_awake">Wach bleiben</string>
+	<string name="stay_awake_desc">Das Telefon nicht einschlafen lassen.</string>
+
+	<string name="override_sound">Individuellen Ton erzwingen</string>
+	<string name="override_sound_desc">Nur auswählen, falls das Setzen eines Tons fehlschlägt.</string>
+
+	<string name="about_desc">Über Bodhi Timer</string>
+
 	<!-- About -->
 	<string name="close">Schließen</string>
 	<string name="about">Info</string>
-	<string name="about_website">Tea Timer auf Github</string>
-	<string name="about_title">Über Tea Timer</string>
-	<string name="about_details_desc">TeaTimer hilft dir deinen Tee richtig zu kochen.\n\nTea Timer ist freie Software (nicht im Sinne von Kostenlos) und du kannst sie auch für die Spaghetti nutzen.</string>
-	<string name="about_details_licence">TeaTimer ist freie Software: Du kannst es unter den Bedingungen der GNU General Public License der Version 3 verbreiten, verändern etc.</string>
+	<string name="about_website">Bodhi Timer auf GitHub</string>
+	<string name="about_title">Über Bodhi Timer</string>
+	<string name="about_details_desc">Bodhi Timer ist ein eleganter, minimalistischer Countdown Timer, hauptsächlich als Meditationstimer gedacht, aber einfach für jeden ähnlichen Zweck einsetzbar.\n\nSetz die Zeit über das Uhr-Icon oben links, pausieren/weitermachen über die Knöpfe unten links, und stopp den Timer über den Knopf unten rechts. Der Knopf oben rechts ist der Einstellungsknopf.\n\nKlicken auf das Bodhiblatt wechselt auf eine von vier Kreisanimationen, die im Einstellungsbildschirm ausgewählt werden können.</string>
+	<string name="about_details_licence">Bodhi Timer ist freie und Open Source Software: Du kannst es unter den Bedingungen der GNU General Public License, von der Free Software Foundation veröffentlicht, Version 3 oder jede spätere Version weiterverbreiten und/oder verändern.</string>
 	<string name="about_details_url">http://www.gnu.org/licenses/gpl.html</string>
-	<string name="about_site">Auf Github gibt es die aktuelle Version des Quellcodes.</string>
-	<string name="about_site_url">https://github.com/ralphleon/TeaTimer</string>	
-		
+	<string name="about_site">Besorg die aktuelle Version des Quellcodes auf GitHub:</string>
+	<string name="about_site_url">https://github.com/yuttadhammo/BodhiTimer</string>	
+	<string name="about_details_upstream">Bodhi Timer ist ein Fork der Open Source TeaTimer App von Ralph Gootee &lt;rgootee@gmail.com&gt;, die auch auf GitHub verfügbar ist:\n\nhttps://github.com/ralphleon/TeaTimer</string>
+
+	<string name="zero">00</string>
+	<string name="set">Setzen</string>
+	<string name="pause">Pause</string>
+
+	<string name="H">Std</string>
+	<string name="M">Min</string>
+	<string name="S">Sek</string>
+
 </resources>
 
 
