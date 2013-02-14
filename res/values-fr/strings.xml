@@ -49,5 +49,5 @@
 	<string name="about_details_url">http://www.gnu.org/licenses/gpl.html</string>
 	<string name="about_site">La dernière version du code source est disponible sur GitHub.</string>
 	<string name="about_site_url">https://github.com/ralphleon/TeaTimer</string>	
-	<string name="about_details_upstream">Bodhi Timer est un fork de l'application open source TeaTimer de Ralph Gootee &lt;rgootee@gmail.com&gt;, aussi disponible sur GitHub:\n\nhttps://github.com/ralphleon/TeaTimer</string>
+	<string name="about_details_upstream">Bodhi Timer est un fork de l\'application open source TeaTimer de Ralph Gootee &lt;rgootee@gmail.com&gt;, aussi disponible sur GitHub:\n\nhttps://github.com/ralphleon/TeaTimer</string>
 </resources>

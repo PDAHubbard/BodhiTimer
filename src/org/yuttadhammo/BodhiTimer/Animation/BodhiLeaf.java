@@ -31,11 +31,8 @@ class BodhiLeaf implements TimerAnimation.TimerDrawing
 
 	private SharedPreferences prefs;
 
-	private Context context;
-
 	public BodhiLeaf(Context context) throws FileNotFoundException
 	{
-		this.context = context;
 		mProgressPaint = new Paint();
 		mProgressPaint.setColor(Color.BLACK);
 		mProgressPaint.setAlpha(255);
@@ -87,7 +84,7 @@ class BodhiLeaf implements TimerAnimation.TimerDrawing
 			rd = new Rect(0,shift,w,nHeight+shift);
 		}
 			
-		Log.i("Timer",nWidth+" "+nHeight+" "+w+" "+h);
+		//Log.i("Timer",nWidth+" "+nHeight+" "+w+" "+h);
 		
 		canvas.drawBitmap(mCupBitmap, rs, rd, null);
 		

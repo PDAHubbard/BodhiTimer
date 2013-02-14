@@ -28,6 +28,7 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 	
 	Context mContext;
 	private TimerActivity mActivity;
+	private boolean clicked;
 	
 	public interface TimerDrawing{
 		
@@ -83,12 +84,20 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 
 	@Override
 	public void onDraw(Canvas canvas){
-		mDrawings.get(mIndex).updateImage(canvas, mLastTime, mLastMax);
+		if(clicked) {
+			clicked = false;
+			mDrawings.get(mIndex).updateImage(canvas, mLastMax, mLastMax);
+		}
+		else
+			mDrawings.get(mIndex).updateImage(canvas, mLastTime, mLastMax);
 	}
 	
 	public void onClick(View v){
 		if(mActivity.mCurrentState == TimerActivity.STOPPED)
 			mActivity.mNM.cancelAll();
+		else
+			clicked = true;
+		
 		startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_out));
 		
 		mIndex++;
