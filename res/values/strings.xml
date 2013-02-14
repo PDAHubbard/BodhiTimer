@@ -27,13 +27,13 @@
 	<string name="playing_sound_desc">Click to stop the current playing sound.</string>
 		
 		
-	<string name="notification_vibrate">Notification Vibrate</string>
+	<string name="notification_vibrate">Enable Vibration</string>
 	<string name="notification_vibrate_desc">Cause the timer to trigger vibration.</string>
 	
-	<string name="led_notification">LED Notification</string>
+	<string name="led_notification">Enable LED Blinking</string>
 	<string name="led_notification_desc">Blink LED light during notification.</string>
 
-	<string name="auto_clear">Clear automatically</string>
+	<string name="auto_clear">Auto-Clear Notification</string>
 	<string name="auto_clear_desc">Clear notification automatically after a few seconds.</string>
 	
 	<string name="visual">Visual</string>
@@ -41,18 +41,18 @@
 	<string name="custom_bmp">Use Custom Image</string>
 	<string name="bmp_url">Choose Custom Image</string>
 			
-	<string name="color_theme">Circle Theme</string>
-	<string name="color_theme_desc">(Click on Bodhi leaf to toggle the circle animation)</string>
+	<string name="color_theme">Choose Circle Animation</string>
+	<string name="color_theme_desc">(Click on Bodhi leaf to switch to circle animation)</string>
 	
 	<string name="fullscreen">Full Screen</string>
-	<string name="fullscreen_desc">Hide the status bar when running</string>
+	<string name="fullscreen_desc">Hide the status bar when timer is running.</string>
 	
-	<string name="hide_time">Hide Time</string>
-	<string name="hide_time_desc">don\'t show time left</string>
+	<string name="hide_time">Hide Time Left</string>
+	<string name="hide_time_desc">Don\'t show time left.</string>
 	
 	<string name="misc">Misc</string>
 	
-	<string name="nag_dialog">Popup Dialog</string>
+	<string name="nag_dialog">Dialog on Silent</string>
 	<string name="nag_dialog_desc">When the phone is set to silent show a popup dialog.</string>
 	
 	<string name="repeat_timer">Repeat Timer</string>
