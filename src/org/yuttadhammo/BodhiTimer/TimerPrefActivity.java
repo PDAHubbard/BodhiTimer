@@ -32,6 +32,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager.LayoutParams;
+import android.webkit.WebView;
 import android.widget.Toast;
 
 public class TimerPrefActivity extends PreferenceActivity 
@@ -160,6 +161,8 @@ public class TimerPrefActivity extends PreferenceActivity
 			public boolean onPreferenceClick(Preference preference) {
 				LayoutInflater li = LayoutInflater.from(context);
 	            View view = li.inflate(R.layout.about, null);
+				WebView wv = (WebView) view.findViewById(R.id.about_text);
+			    wv.loadData(getString(R.string.about_text), "text/html", "utf-8");
 				
 				Builder p = new AlertDialog.Builder(context).setView(view);
 	            final AlertDialog alrt = p.create();

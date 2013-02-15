@@ -172,9 +172,8 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 			float p = (mLastTime != 0) ? (delta/(float)mLastTime) : 0;
 			bmp = adjustOpacity(bmp,(int)(255-(255*p)));
 	   		views.setTextViewText(R.id.time, getTime(delta));
-            
-
-    	}else{
+    	}
+		else{
             views.setTextViewText(R.id.time, "");
     		final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     		

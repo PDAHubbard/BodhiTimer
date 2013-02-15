@@ -12,8 +12,7 @@
 package org.yuttadhammo.BodhiTimer;
 
 import org.yuttadhammo.BodhiTimer.Animation.TimerAnimation;
-import org.yuttadhammo.BodhiTimer.widget.NNumberPickerDialog;
-import org.yuttadhammo.BodhiTimer.widget.NNumberPickerDialog.OnNNumberPickedListener;
+import org.yuttadhammo.BodhiTimer.NNumberPickerDialog.OnNNumberPickedListener;
 
 import java.io.FileNotFoundException;
 import java.util.Calendar;
@@ -440,20 +439,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	 */
 	private void enterState(int state){
 
-		// start widget checking
-		
-		PendingIntent pi = PendingIntent.getBroadcast(this, 0,
-				new Intent("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE"), PendingIntent.FLAG_UPDATE_CURRENT);
-		final AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-		
-		// schedules updates so they occur on the top of the second
-		final Calendar c = Calendar.getInstance();
-		c.setTimeInMillis(System.currentTimeMillis());
-		c.set(Calendar.MILLISECOND, 0);
-		c.add(Calendar.SECOND,1);
-
-		alarmManager.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 1000, pi);
-		
 		if(mCurrentState != state){
 			
 			setButtonAlpha(255);
@@ -464,6 +449,18 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			{
 				case RUNNING:
 				{
+					// start widget checking
+
+					final Calendar c = Calendar.getInstance();
+					c.setTimeInMillis(System.currentTimeMillis());
+					c.set(Calendar.MILLISECOND, 0);
+					c.add(Calendar.SECOND,1);
+					
+					PendingIntent pi = PendingIntent.getBroadcast(this, 0,
+							new Intent("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE"), PendingIntent.FLAG_UPDATE_CURRENT);
+					final AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+					alarmManager.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 1000, pi);
+					
 					mSetButton.setVisibility(View.GONE);
 					mCancelButton.setVisibility(View.VISIBLE);
 					mPauseButton.setVisibility(View.VISIBLE);

@@ -1,4 +1,4 @@
-package org.yuttadhammo.BodhiTimer.widget;
+package org.yuttadhammo.BodhiTimer;
 
 import java.util.Set;
 
@@ -20,6 +20,7 @@ import android.widget.FrameLayout.LayoutParams;
 import android.widget.Gallery;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /** Dialog box with an arbitrary number of number pickers */
 public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLongClickListener {
@@ -156,8 +157,10 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
 	}
     
 	private void setFromPre(String ts) {
-		if(ts == null)
+		if(ts == null) {
+			Toast.makeText(context, context.getString(R.string.longclick),Toast.LENGTH_LONG).show();
 			return;
+		}
 		
         if (mCallback != null) {
     		int h = Integer.parseInt(ts.substring(0, 2));
@@ -167,8 +170,10 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
     		if(h != 0 || m != 0 || s != 0) {
 	            int[] values = {h,m,s};
 	            mCallback.onNumbersPicked(values);
+	        	dismiss();
     		}
-        	dismiss();
+    		else
+    			Toast.makeText(context, context.getString(R.string.longclick),Toast.LENGTH_LONG).show();
         }
 	}
 
@@ -223,7 +228,11 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
 					t = context.getString(R.string.pre4);
 			}
 		}
-		((TextView) v).setText(t);
+		if(s == null && ((TextView) v).getText().equals(t)) {
+			Toast.makeText(context, context.getString(R.string.notset),Toast.LENGTH_LONG).show();
+		}
+		else
+			((TextView) v).setText(t);
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putString("pre"+i, s);
 		editor.commit();

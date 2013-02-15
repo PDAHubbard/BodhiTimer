@@ -58,13 +58,13 @@
 	
 	<string name="misc">Misc</string>
 	
-	<string name="nag_dialog">Dialog on Silent</string>
+	<string name="nag_dialog">Popup When Silent</string>
 	<string name="nag_dialog_desc">When the phone is set to silent show a popup dialog.</string>
 	
 	<string name="repeat_timer">Repeat Timer</string>
 	<string name="repeat_timer_desc">Restart timer automatically on finish.</string>
 		
-	<string name="stay_awake">Stay awake</string>
+	<string name="stay_awake">Stay Awake</string>
 	<string name="stay_awake_desc">Don\'t allow the phone to go to sleep.</string>
 
 	<string name="override_sound">Force Custom Sound</string>
@@ -75,17 +75,30 @@
 	<!-- About -->
 	<string name="close">Close</string>
 	<string name="about">About</string>
-	<string name="about_website">Bodhi Timer on GitHub</string>
 	<string name="about_title">About Bodhi Timer</string>
-	<string name="about_details_desc">Bodhi Timer is an elegant, minimalist countdown timer, designed mainly for use as a meditation timer, but it can easily be used for any similar purpose.\n\nSet the time via the clock icon in the top left, pause/resume via the buttons in the bottom left, and stop the timer via the button in the bottom right.  The top right button is the preference button.\n\nClicking on the Bodhi leaf changes to one of four circle animations, which can be chosen from the preferences screen.</string>
-	<string name="about_details_licence">Bodhi Timer is free and open source software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.</string>
-	<string name="about_details_url">http://www.gnu.org/licenses/gpl.html</string>
-	<string name="about_site">Get the latest version of the source code on GitHub:</string>
-	<string name="about_site_url">https://github.com/yuttadhammo/BodhiTimer</string>
-	<string name="about_details_upstream">Bodhi Timer is a fork of the open source TeaTimer app by Ralph Gootee &lt;rgootee@gmail.com&gt;, which is also available on GitHub:\n\nhttps://github.com/ralphleon/TeaTimer</string>
-
+	<string name="about_text">
+		<![CDATA[
+			<body style="text-align:justify;font-size:20px;color:white;background-color:black;>
+				<p><b>Bodhi Timer</b> is an elegant, minimalist countdown timer.  It was designed mainly for use as a meditation timer but can easily be used for any similar purpose.</p>
+				<p><b>Set the time</b> via the clock button in the top left corner.  You may <b>set presets</b> by choosing a time then holding down on one of the three preset buttons.</p>
+				<p><b>Pause/resume</b> via the buttons in the bottom left corner and stop the timer via the button in the bottom right.  <b>Change preferences</b> via the top-right button.</p>
+				<p>Clicking on the Bodhi leaf changes to one of four circle animations, which can be chosen from the preferences screen.  The Bodhi leaf may also be substituted for a custom image via the preferences screen.</p>
+				<p>You may <b>add a widget</b> to your desktop via the App Drawer, or on your lockscreen (Android 4.2+).</p>
+				<p><b>Bodhi Timer</b> is free and open source software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.</p>
+				<p><b><a href="http://www.gnu.org/licenses/gpl.html">http://www.gnu.org/licenses/gpl.html</a></b></p>
+				<p>Get the latest version of the source code on GitHub:</p>
+				<p><b><a href="https://github.com/yuttadhammo/BodhiTimer">https://github.com/yuttadhammo/BodhiTimer</a></b></p>
+				<p>Bodhi Timer is a fork of the open source TeaTimer app by Ralph Gootee &lt;rgootee@gmail.com&gt;, which is also available on GitHub:</p>
+				<p><b><a href="https://github.com/ralphleon/TeaTimer">https://github.com/ralphleon/TeaTimer</a></b></p>
+			</body>
+		]]>
+	</string>
+	
 	<!-- Timer -->
 		
+	<string name="longclick">Press and hold on button to set preset</string>	
+	<string name="notset">Select time before setting preset</string>	
+	
 	<string name="zero">00</string>	
 	<string name="set">Set</string>	
 	<string name="pause">Pause</string>	
