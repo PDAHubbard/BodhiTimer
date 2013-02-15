@@ -3,6 +3,7 @@ package org.yuttadhammo.BodhiTimer.widget;
 import org.yuttadhammo.BodhiTimer.R;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
@@ -77,6 +78,7 @@ public class AppWidgetConfigure extends Activity implements OnClickListener {
 		Intent resultValue = new Intent();
 		resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
 		setResult(RESULT_OK, resultValue);
+		this.sendBroadcast(new Intent(BodhiAppWidgetProvider.ACTION_CLOCK_UPDATE));
 		finish();
 	}
 	

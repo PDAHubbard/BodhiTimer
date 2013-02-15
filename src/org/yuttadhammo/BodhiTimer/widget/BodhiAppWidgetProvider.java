@@ -37,7 +37,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     
     public void onUpdate(Context context, final AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 
-    	Log.i("Timer","update");
+    	Log.i("Timer Widget","update");
     	startTicking(context);
     }
    
@@ -50,6 +50,8 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	@Override
 	public void onEnabled(Context context) {
 		super.onEnabled(context);
+    	Log.i("Timer Widget","enabled");
+    	startTicking(context);
 	
 	}
 
