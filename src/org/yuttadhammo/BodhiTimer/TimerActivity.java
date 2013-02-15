@@ -16,6 +16,7 @@ import org.yuttadhammo.BodhiTimer.widget.NNumberPickerDialog;
 import org.yuttadhammo.BodhiTimer.widget.NNumberPickerDialog.OnNNumberPickedListener;
 
 import java.io.FileNotFoundException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -62,7 +63,7 @@ import android.widget.Toast;
 public class TimerActivity extends Activity implements OnClickListener,OnNNumberPickedListener,OnSharedPreferenceChangeListener
 {
 	/** All possible timer states */
-	final static int RUNNING=0;
+	public final static int RUNNING=0;
 
 	public static final int STOPPED=1;
 
@@ -140,6 +141,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	// for canceling notifications
 	
 	public NotificationManager mNM;
+
+	private boolean widget;
 	
 	/** Called when the activity is first created.
      *	{ @inheritDoc} 
@@ -189,6 +192,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         mNM = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
        
 		mSettings.registerOnSharedPreferenceChangeListener(this);
+		if(getIntent().hasExtra("set") && mCurrentState == STOPPED) {
+			widget = true;		
+		}
     }
 
 	/** { @inheritDoc} */
@@ -280,6 +286,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         switch(state)
         {
         	case RUNNING:
+        		widget = false;
         		long timeStamp = mSettings.getLong("TimeStamp", -1);
                 
         		Date now = new Date();
@@ -300,9 +307,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         	case STOPPED:
                 mNM.cancelAll();
         		enterState(STOPPED);
+        		if(widget == true)
+        			showDialog(NUM_PICKER_DIALOG);
         		break;
         	
         	case PAUSED:
+        		widget = false;
         		mTime = mSettings.getInt("CurrentTime",0);
         		onUpdateTime();
         		enterState(PAUSED);
@@ -326,7 +336,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
      * Updates the time 
      */
 	public void onUpdateTime(){
-		
+
     	updateLabel(mTime);
     	mTimerAnimation.updateImage(mTime,mLastTime);  	
     }
@@ -386,6 +396,11 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	 */
 	public void onNumbersPicked(int[] number)
 	{
+		if(number == null) {
+			widget = false;
+			return;
+		}
+			
 		int hour = number[0];
 		int min = number[1];
 		int sec = number[2];
@@ -410,6 +425,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		}
 		
 		timerStart(mLastTime,true);
+		
+		if(widget == true) {
+			finish();		
+		}
 	}
 
 
@@ -420,6 +439,20 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	 * @param state the visual state that is being entered
 	 */
 	private void enterState(int state){
+
+		// start widget checking
+		
+		PendingIntent pi = PendingIntent.getBroadcast(this, 0,
+				new Intent("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE"), PendingIntent.FLAG_UPDATE_CURRENT);
+		final AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		
+		// schedules updates so they occur on the top of the second
+		final Calendar c = Calendar.getInstance();
+		c.setTimeInMillis(System.currentTimeMillis());
+		c.set(Calendar.MILLISECOND, 0);
+		c.add(Calendar.SECOND,1);
+
+		alarmManager.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 1000, pi);
 		
 		if(mCurrentState != state){
 			
@@ -603,6 +636,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 			case R.id.prefButton:
 				Log.i("Timer","pref button clicked");
+				widget = false;
 				startActivity(new Intent(this, TimerPrefActivity.class));	
 				break;
 			

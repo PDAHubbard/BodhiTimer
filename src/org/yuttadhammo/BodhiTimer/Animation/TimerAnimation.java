@@ -45,8 +45,19 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 	public void setActivity(TimerActivity activity) {
 		mActivity = activity;
 	}
+
+	public TimerAnimation(Context context){
+		
+		super(context);
+		mContext = context;
+		
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+		prefs.registerOnSharedPreferenceChangeListener(this);
+		
+		setOnClickListener(this);
+	}
 	
-	public TimerAnimation(Context context, AttributeSet attrs) throws FileNotFoundException{
+	public TimerAnimation(Context context, AttributeSet attrs) {
 		
 		super(context, attrs);
 		mContext = context;

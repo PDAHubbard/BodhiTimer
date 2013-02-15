@@ -50,6 +50,7 @@
 					android:text="@string/H"
 					android:padding="10dp"
 					android:textSize="17sp"
+					android:textColor="#FFFFFF"
 				/>
 				<Gallery 
 					android:layout_width="match_parent" 
@@ -74,6 +75,7 @@
 					android:text="@string/M"
 					android:textSize="17sp"
 					android:padding="10dp"
+					android:textColor="#FFFFFF"
 				/>
 				<Gallery 
 					android:layout_width="match_parent" 
@@ -95,7 +97,7 @@
 					android:layout_width="40dp"
 					android:layout_height="match_parent"
 					android:gravity="center"
-					android:textColor="@color/gallery_item_color" 
+					android:textColor="#FFFFFF"
 					android:text="@string/S"
 					android:textSize="17sp"
 					android:padding="10dp"
@@ -107,6 +109,43 @@
 					android:spacing="6dp" 
 			        android:background="@drawable/glass"
 					android:layout_height="wrap_content"/>
+			</LinearLayout>
+			<LinearLayout
+		        android:id="@+id/pre_button_cont"
+		        android:gravity="center"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:orientation="horizontal"
+		        >
+				<Button
+				    android:id="@+id/btn1"
+				    android:text="@string/pre1"
+			        android:layout_width="0dp"
+			        android:layout_height="wrap_content"
+				    android:layout_weight="0.33" 
+				    />
+				<Button
+				    android:id="@+id/btn2"
+				    android:text="@string/pre2"
+			        android:layout_width="0dp"
+			        android:layout_height="wrap_content"
+				    android:layout_weight="0.33" 
+				    />
+				<Button
+				    android:id="@+id/btn3"
+				    android:text="@string/pre3"
+			        android:layout_width="0dp"
+			        android:layout_height="wrap_content"
+				    android:layout_weight="0.33" 
+				    />
+				<Button
+				    android:id="@+id/btn4"
+				    android:visibility="gone"
+				    android:text="@string/pre4"
+			        android:layout_width="0dp"
+			        android:layout_height="wrap_content"
+				    android:layout_weight="0.33" 
+				    />
 			</LinearLayout>
 			<LinearLayout
 		        android:id="@+id/button_cont"

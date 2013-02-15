@@ -14,8 +14,14 @@
 	<string name="timer_for">"Timer for "</string>
 	
 	<string name="prefs">Preferences</string>
+
+	<!-- Widget -->
 	
+	<string name="choose_widget">Choose Widget Theme:</string>
+	<string name="theme">widget theme</string>
+				
 	<!-- Preferences -->
+	
 	<string name="notification">Notification</string>
 	<string name="notification_sound">Timer Sound</string>
 	<string name="notification_sound_desc">The sound to play when the timer finishes</string>
@@ -66,7 +72,6 @@
 		
 	<string name="about_desc">About Bodhi Timer</string>
 	
-	
 	<!-- About -->
 	<string name="close">Close</string>
 	<string name="about">About</string>
@@ -78,7 +83,9 @@
 	<string name="about_site">Get the latest version of the source code on GitHub:</string>
 	<string name="about_site_url">https://github.com/yuttadhammo/BodhiTimer</string>
 	<string name="about_details_upstream">Bodhi Timer is a fork of the open source TeaTimer app by Ralph Gootee &lt;rgootee@gmail.com&gt;, which is also available on GitHub:\n\nhttps://github.com/ralphleon/TeaTimer</string>
-	
+
+	<!-- Timer -->
+		
 	<string name="zero">00</string>	
 	<string name="set">Set</string>	
 	<string name="pause">Pause</string>	
@@ -86,7 +93,11 @@
 	<string name="H">H</string>	
 	<string name="M">M</string>	
 	<string name="S">S</string>	
-			
+
+	<string name="pre1">one</string>
+	<string name="pre2">two</string>
+	<string name="pre3">three</string>
+	<string name="pre4">four</string>			
 		
 </resources>
 
