@@ -106,7 +106,14 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 					Context context = getApplicationContext();
 					CharSequence text = getResources().getText(R.string.Notification);
 					Toast.makeText(context, text,Toast.LENGTH_SHORT).show();
-					timerStop();
+					
+					if(mSettings.getBoolean("AutoRestart", false)) {
+						timerStop();
+						mTime = mLastTime;
+						timerStart(mLastTime,false);
+					}
+					else
+						timerStop();
 				}
 				
 			// Update the time
@@ -181,17 +188,17 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		mTimerAnimation = (TimerAnimation)findViewById(R.id.mainImage);
 		mTimerAnimation.setActivity(this);
 		
-        enterState(STOPPED);
-        
-      
         // Store some useful values
         mSettings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         mAlarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         mAudioMgr = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         mNM = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
-       
+
+        //enterState(STOPPED);
+        
 		mSettings.registerOnSharedPreferenceChangeListener(this);
-		if(getIntent().hasExtra("set") && mCurrentState == STOPPED) {
+		if(getIntent().hasExtra("set")) {
+			Log.d(TAG,"Create From Widget");
 			widget = true;		
 		}
     }
@@ -219,10 +226,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         
         	case RUNNING:
         	{
-	        	if(mTimer != null){
+	        	Log.i(TAG,"pause while running: "+new Date().getTime() + mTime);
+        		if(mTimer != null){
 	        		mTimer.cancel();
 	        		editor.putLong("TimeStamp", new Date().getTime() + mTime);
-	        	}	
+	        	}
+        		
         	}break;
         	
         	case STOPPED:
@@ -285,6 +294,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         switch(state)
         {
         	case RUNNING:
+	        	Log.i(TAG,"Resume while running: "+mSettings.getLong("TimeStamp", -1));
         		widget = false;
         		long timeStamp = mSettings.getLong("TimeStamp", -1);
                 
@@ -335,7 +345,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
      * Updates the time 
      */
 	public void onUpdateTime(){
-
+		if(mCurrentState == STOPPED)
+			mTime = 0;
     	updateLabel(mTime);
     	mTimerAnimation.updateImage(mTime,mLastTime);  	
     }
@@ -440,6 +451,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private void enterState(int state){
 
 		if(mCurrentState != state){
+
+			// update preference for widget, notification
+			
+	        SharedPreferences.Editor editor = mSettings.edit();
+	        editor.putInt("State", state);
+	        editor.commit();
 			
 			setButtonAlpha(255);
 			mCurrentState = state;		
@@ -449,18 +466,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			{
 				case RUNNING:
 				{
-					// start widget checking
-
-					final Calendar c = Calendar.getInstance();
-					c.setTimeInMillis(System.currentTimeMillis());
-					c.set(Calendar.MILLISECOND, 0);
-					c.add(Calendar.SECOND,1);
-					
-					PendingIntent pi = PendingIntent.getBroadcast(this, 0,
-							new Intent("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE"), PendingIntent.FLAG_UPDATE_CURRENT);
-					final AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-					alarmManager.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 1000, pi);
-					
+			        
 					mSetButton.setVisibility(View.GONE);
 					mCancelButton.setVisibility(View.VISIBLE);
 					mPauseButton.setVisibility(View.VISIBLE);
@@ -470,6 +476,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		
 				case STOPPED:
 				{	
+					mNM.cancelAll();
 					mPauseButton.setVisibility(View.GONE);
 					mCancelButton.setVisibility(View.GONE);
 					mSetButton.setVisibility(View.VISIBLE);	
@@ -486,6 +493,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 				}break;	
 			}
 		}
+		
 	}
 	
 	private void setButtonAlpha(int i) {
@@ -555,6 +563,13 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		if(LOG) Log.v(TAG,"Starting the timer...");
 		
 		enterState(RUNNING);
+
+		mTime = time;
+		
+        SharedPreferences.Editor editor = mSettings.edit();
+		editor.putLong("TimeStamp", new Date().getTime() + mTime);
+        editor.commit();
+
 		
 		// Start external service
 		if(service){
@@ -564,10 +579,22 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		    mPendingIntent = PendingIntent.getBroadcast( getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 		    mAlarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + time, mPendingIntent);	    
 		}
+
+		// start widget checking
+
+		final Calendar c = Calendar.getInstance();
+		c.setTimeInMillis(System.currentTimeMillis());
+		c.set(Calendar.MILLISECOND, 0);
+		c.add(Calendar.SECOND,1);
+		
+		PendingIntent pi = PendingIntent.getBroadcast(this, 0,
+				new Intent("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE"), PendingIntent.FLAG_UPDATE_CURRENT);
+		final AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		alarmManager.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 1000, pi);
 		
 		// Internal thread to properly update the GUI
 		mTimer = new Timer();	
-		mTime = time;
+        
 		mTimer.scheduleAtFixedRate( new TimerTask(){
 	        	public void run() {
 	          		timerTic();

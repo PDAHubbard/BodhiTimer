@@ -1,6 +1,8 @@
 package org.yuttadhammo.BodhiTimer;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -119,7 +121,35 @@ public class TimerReceiver extends BroadcastReceiver {
         PendingIntent pendingCancelIntent =
             PendingIntent.getBroadcast(appContext, 0, intent,
                                        PendingIntent.FLAG_CANCEL_CURRENT);
-		
+
+        
+
+
+      	if(settings.getBoolean("overrideSound", false)) {
+      		
+      		//remove notification sound
+      		mBuilder.setSound(null);
+			
+	        try {
+				player.setDataSource(context, uri);
+		        player.prepare();
+		        player.setLooping(false);
+		        player.setOnCompletionListener(new OnCompletionListener(){
+
+					@Override
+					public void onCompletion(MediaPlayer mp) {
+						// TODO Auto-generated method stub
+						mp.release();
+					}
+		        	
+		        });
+		        player.start();
+	        } catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+      	}
+      	
         if (settings.getBoolean("AutoClear", false)) {
             // Determine duration of notification sound
             int duration = 5000;
@@ -145,33 +175,32 @@ public class TimerReceiver extends BroadcastReceiver {
             alarmMgr.set(AlarmManager.ELAPSED_REALTIME,
                          SystemClock.elapsedRealtime() + duration,
                          pendingCancelIntent);
+        }  
+
+        if (settings.getBoolean("AutoRestart", false)) {
+        	int time = pintent.getIntExtra("SetTime",0);
+        	if (time != 0) {
+                mNM.cancel(0);
+    		    Log.v(TAG,"Restarting the timer service ...");
+    		    Intent rintent = new Intent( context, TimerReceiver.class);
+    		    rintent.putExtra("SetTime",time);
+    		    PendingIntent mPendingIntent = PendingIntent.getBroadcast( context, 0, rintent, PendingIntent.FLAG_CANCEL_CURRENT);
+                AlarmManager mAlarmMgr = (AlarmManager)context
+                        .getSystemService(Context.ALARM_SERVICE);
+                mAlarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + time, mPendingIntent);
+
+                // Save new time
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putLong("TimeStamp", new Date().getTime() + time);
+                editor.commit();
+                
+        	}
         }
-
-      	if(settings.getBoolean("overrideSound", false)) {
-      		mBuilder.setSound(null);
-			
-	        try {
-				player.setDataSource(context, uri);
-		        player.prepare();
-		        player.setLooping(false);
-		        player.setOnCompletionListener(new OnCompletionListener(){
-
-					@Override
-					public void onCompletion(MediaPlayer mp) {
-						// TODO Auto-generated method stub
-						mp.release();
-					}
-		        	
-		        });
-		        player.start();
-	        } catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-      	}
-        
+                
 		// mId allows you to update the notification later on.
 		mNotificationManager.notify(0, mBuilder.build());
+
+
 		
 	}
 }

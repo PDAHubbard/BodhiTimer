@@ -27,6 +27,11 @@
                 android:defaultValue="True" />
 
         <CheckBoxPreference
+                android:key="AutoRestart"
+                android:title="@string/auto_restart"
+                android:summary="@string/auto_restart_desc"
+                android:defaultValue="False" />
+        <CheckBoxPreference
                 android:key="AutoClear"
                 android:title="@string/auto_clear"
                 android:summary="@string/auto_clear_desc"

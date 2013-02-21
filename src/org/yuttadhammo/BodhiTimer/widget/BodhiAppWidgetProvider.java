@@ -37,7 +37,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     
     public void onUpdate(Context context, final AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 
-    	Log.i("Timer Widget","update");
+    	//Log.i("Timer Widget","update");
     	startTicking(context);
     }
    
@@ -80,7 +80,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 		final String action = intent.getAction();
 	
 		if (ACTION_CLOCK_UPDATE.equals(action)){
-            Log.d("Timer Widget", "received broadcast");
+            //Log.d("Timer Widget", "received broadcast");
 			final ComponentName appWidgets = new ComponentName(context.getPackageName(), getClass().getName());
 			final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 			final int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
@@ -167,6 +167,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         int mLastTime = mSettings.getInt("LastTime",0); 
         
         state = mSettings.getInt("State",0);
+        Log.d("Timer Widget", "state=" + state);
     	
         // We still have a timer running!
 		if(then.after(now) && state == TimerActivity.RUNNING){
