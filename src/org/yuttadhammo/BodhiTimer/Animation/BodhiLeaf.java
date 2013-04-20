@@ -53,7 +53,6 @@ class BodhiLeaf implements TimerAnimation.TimerDrawing
 		mHeight = mCupBitmap.getHeight();
 		mWidth = mCupBitmap.getWidth();
 
-		Bitmap.createBitmap(mWidth,mHeight,Bitmap.Config.ARGB_8888);
 	}
 
 	/**
