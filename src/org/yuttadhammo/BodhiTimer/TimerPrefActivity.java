@@ -227,7 +227,37 @@ public class TimerPrefActivity extends PreferenceActivity
 			}
 
     	});
+
+        final Preference indexPref = (Preference)findPreference("DrawingIndex");
+		int dIndex = settings.getInt("DrawingIndex", 0);
+		if(dIndex == 0)
+			indexPref.setSummary(getString(R.string.is_bitmap));
+		else
+			indexPref.setSummary(getString(R.string.is_circle));
         
+        indexPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+
+			@Override
+			public boolean onPreferenceClick(Preference preference) {
+				int dIndex = settings.getInt("DrawingIndex", 0);
+				dIndex++;
+				dIndex %= 2;
+				
+				if(dIndex == 0) {
+					indexPref.setSummary(getString(R.string.is_bitmap));
+				}
+				else {
+					indexPref.setSummary(getString(R.string.is_circle));
+				}
+		        Editor mSettingsEdit = settings.edit();
+        		mSettingsEdit.putInt("DrawingIndex", dIndex);
+        		mSettingsEdit.commit();
+	            return true;
+				   			
+			}
+
+    	});
+
     }
 
     @Override

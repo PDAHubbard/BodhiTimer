@@ -28,8 +28,7 @@ This software is free and open source, under the GPL v3 license, for more info p
 
 Changelog
 =================
-0.2 - softer bell, new icons
-0.1 - first version, may have bugs!
+
 
 Credits
 =================

@@ -58,7 +58,7 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
      * @param title title of the dialog box
      */
     public NNumberPickerDialog(Context context, OnNNumberPickedListener callBack,
-            String title)
+            String title, int[] time)
     {
         super(context, R.style.NPTheme);
         this.context = context;
@@ -83,6 +83,10 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
 		hour.setAdapter(adapter1);
 		min.setAdapter(adapter1);
 		sec.setAdapter(adapter1);
+		
+		hour.setSelection(time[0]);
+		min.setSelection(time[1]);
+		sec.setSelection(time[2]);
 		
 		Button cancel = (Button) findViewById(R.id.btnCancel);
 		Button ok = (Button) findViewById(R.id.btnOk);
@@ -117,6 +121,15 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
 		pre2.setOnLongClickListener(this);
 		pre3.setOnLongClickListener(this);
 		pre4.setOnLongClickListener(this);		
+
+		TextView htext = (TextView) findViewById(R.id.text_hour);
+		TextView mtext = (TextView) findViewById(R.id.text_min);
+		TextView stext = (TextView) findViewById(R.id.text_sec);
+
+		htext.setOnClickListener(this);
+		mtext.setOnClickListener(this);
+		stext.setOnClickListener(this);
+
     }
 
 	/** {@inheritDoc} */
@@ -152,6 +165,16 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
 			case R.id.btn4:
 				setFromPre(i4);
 				break;
+			case R.id.text_hour:
+				hour.setSelection(0);
+				break;
+			case R.id.text_min:
+				min.setSelection(0);
+				break;
+			case R.id.text_sec:
+				sec.setSelection(0);
+				break;
+				
 		}
 		
 	}

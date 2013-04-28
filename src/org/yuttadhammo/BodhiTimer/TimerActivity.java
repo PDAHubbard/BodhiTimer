@@ -149,6 +149,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	public NotificationManager mNM;
 
 	private boolean widget;
+
+	private int[] lastTimes;
 	
 	/** Called when the activity is first created.
      *	{ @inheritDoc} 
@@ -194,6 +196,14 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         mAudioMgr = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         mNM = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
 
+        // get last times
+        
+        lastTimes = new int[3];
+        
+        lastTimes[0] = mSettings.getInt("last_hour", 0);
+        lastTimes[1] = mSettings.getInt("last_min", 0);
+        lastTimes[2] = mSettings.getInt("last_sec", 0);
+        
         //enterState(STOPPED);
         
 		mSettings.registerOnSharedPreferenceChangeListener(this);
@@ -221,6 +231,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         editor.putInt("CurrentTime",mTime);
         editor.putInt("DrawingIndex",mTimerAnimation.getIndex());
         editor.putInt("State", mCurrentState);
+
+        editor.putInt("last_hour", lastTimes[0]);
+        editor.putInt("last_min", lastTimes[1]);
+        editor.putInt("last_sec", lastTimes[2]);
         
         switch(mCurrentState){
         
@@ -357,6 +371,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
      * @param time in milliseconds
      */
 	public void updateLabel(int time){
+		if(time == 0)
+			time = mLastTime;
+		
         time += 999;  // round seconds upwards
 		String[] str = TimerUtils.time2str(time);
 		if(str.length == 3)
@@ -381,7 +398,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		switch(id){
 		
 			case NUM_PICKER_DIALOG:
-				d = new NNumberPickerDialog(this, this, getResources().getString(R.string.InputTitle));
+				d = new NNumberPickerDialog(this, this, getResources().getString(R.string.InputTitle),lastTimes);
 				break;
 			
 			case ALERT_DIALOG:
@@ -416,6 +433,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		int sec = number[2];
 		
 		mLastTime = hour*60*60*1000 + min*60*1000 + sec*1000;
+		
+		lastTimes = new int[3];
+		
+		lastTimes[0] = hour;
+		lastTimes[1] = min;
+		lastTimes[2] = sec;
 		
 		// put last set time to prefs
 		
@@ -459,14 +482,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	        editor.commit();
 			
 			setButtonAlpha(255);
-			mCurrentState = state;		
 			if(LOG) Log.v(TAG,"Set current state = " + mCurrentState);
 			
 			switch(state)
 			{
 				case RUNNING:
 				{
-			        
 					mSetButton.setVisibility(View.GONE);
 					mCancelButton.setVisibility(View.VISIBLE);
 					mPauseButton.setVisibility(View.VISIBLE);
@@ -477,7 +498,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 				case STOPPED:
 				{	
 					mNM.cancelAll();
-					mPauseButton.setVisibility(View.GONE);
+					mPauseButton.setImageBitmap(mPlayBitmap);
 					mCancelButton.setVisibility(View.GONE);
 					mSetButton.setVisibility(View.VISIBLE);	
 					clearTime();
@@ -492,6 +513,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 					mPauseButton.setImageBitmap(mPlayBitmap);
 				}break;	
 			}
+			mCurrentState = state;		
 		}
 		
 	}
@@ -672,6 +694,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 						break;
 					case PAUSED:
 						resumeTimer();
+						break;
+					case STOPPED:
+						timerStart(mLastTime,true);
 						break;
 				}
 				break;

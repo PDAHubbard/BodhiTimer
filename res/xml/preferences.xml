@@ -40,6 +40,9 @@
     </PreferenceCategory>
     
     <PreferenceCategory android:title="@string/visual">
+        <Preference
+			android:title="@string/bmp_or_circle"
+			android:key="DrawingIndex" />   
  		<CheckBoxPreference
 			android:title="@string/custom_bmp"
 			android:key="custom_bmp" /> 

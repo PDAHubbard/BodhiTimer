@@ -34,7 +34,9 @@
 	        android:layout_width="300dp"
 	        android:layout_height="250dp"
 	        android:orientation="vertical"
+	        android:background="@drawable/glass"
 	        >
+
 			<LinearLayout
 		        android:id="@+id/hour_cont"
 		        android:gravity="center"
@@ -43,7 +45,7 @@
 		        android:orientation="horizontal"
 		        >
 			    <TextView
-					android:background="#33000000"
+					android:id="@+id/text_hour" 
 					android:layout_width="40dp"
 					android:layout_height="match_parent"
 					android:gravity="center"
@@ -56,7 +58,6 @@
 					android:layout_width="match_parent" 
 					android:id="@+id/gallery_hour" 
 					android:spacing="6dp" 
-			        android:background="@drawable/glass"
 					android:layout_height="wrap_content"/>
 			</LinearLayout>
 			<LinearLayout
@@ -68,7 +69,7 @@
 		        >
 			
 				<TextView
-					android:background="#33000000"
+					android:id="@+id/text_min" 
 					android:layout_width="40dp"
 					android:layout_height="match_parent"
 					android:gravity="center"
@@ -82,7 +83,6 @@
 					android:id="@+id/gallery_min" 
 					android:spacing="6dp" 
 					android:textColor="@color/gallery_item_color" 
-			        android:background="@drawable/glass"
 					android:layout_height="wrap_content"/>
 			</LinearLayout>
 			<LinearLayout
@@ -93,7 +93,7 @@
 		        android:orientation="horizontal"
 		        >
 				<TextView
-					android:background="#33000000"
+					android:id="@+id/text_sec" 
 					android:layout_width="40dp"
 					android:layout_height="match_parent"
 					android:gravity="center"
@@ -107,7 +107,6 @@
 					android:id="@+id/gallery_sec" 
 					android:textColor="@color/gallery_item_color" 
 					android:spacing="6dp" 
-			        android:background="@drawable/glass"
 					android:layout_height="wrap_content"/>
 			</LinearLayout>
 			<LinearLayout
@@ -146,7 +145,7 @@
 			        android:layout_height="wrap_content"
 				    android:layout_weight="0.33" 
 				    />
-			</LinearLayout>
+			</LinearLayout>			
 			<LinearLayout
 		        android:id="@+id/button_cont"
 		        android:gravity="center"

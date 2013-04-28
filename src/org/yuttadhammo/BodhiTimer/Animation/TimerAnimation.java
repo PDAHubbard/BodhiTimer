@@ -109,14 +109,14 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 		else
 			clicked = true;
 		
-		startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_out));
+		//startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_out));
 		
-		mIndex++;
-		mIndex %= mDrawings.size();
+		//mIndex++;
+		//mIndex %= mDrawings.size();
 		
-		startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in));
+		//startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in));
 		
-		invalidate();
+		//invalidate();
 	}
 	
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
