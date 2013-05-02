@@ -130,7 +130,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private ImageButton mPauseButton, mCancelButton, mSetButton, mPrefButton;
 
 	private TimerAnimation mTimerAnimation;
-	private TextView mTimerLabel1;
+	private TextView mTimerLabel;
 	
 	private Bitmap mPlayBitmap,mPauseBitmap;
 
@@ -185,7 +185,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         mPlayBitmap = BitmapFactory.decodeResource(
         		getResources(), R.drawable.play);
    
-		mTimerLabel1 = (TextView)findViewById(R.id.text_top);
+		mTimerLabel = (TextView)findViewById(R.id.text_top);
 
 		mTimerAnimation = (TimerAnimation)findViewById(R.id.mainImage);
 		mTimerAnimation.setActivity(this);
@@ -268,6 +268,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     public void onResume()
     {
     	super.onResume();
+
     	try {
 			mTimerAnimation.resetAnimationList();
 		} catch (FileNotFoundException e) {
@@ -277,9 +278,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		
         mSettings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		if (mSettings.getBoolean("hideTime", false))
-			mTimerLabel1.setVisibility(View.INVISIBLE);
+			mTimerLabel.setVisibility(View.INVISIBLE);
 		else
-			mTimerLabel1.setVisibility(View.VISIBLE);
+			mTimerLabel.setVisibility(View.VISIBLE);
 
 		if(mSettings.getBoolean("FULLSCREEN", false))
 				getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
@@ -355,6 +356,44 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     }
 
     
+	/** {@inheritDoc} */
+	@Override
+	protected Dialog onCreateDialog(int id) 
+	{
+		Dialog d = null;
+		
+		switch(id){
+		
+			case NUM_PICKER_DIALOG:
+				d = new NNumberPickerDialog(this, this, getResources().getString(R.string.InputTitle));
+				break;
+			
+			case ALERT_DIALOG:
+			{
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setMessage(getResources().getText(R.string.warning_text))
+				       .setCancelable(false)
+				       .setPositiveButton(getResources().getText(R.string.warning_button), null)
+				       .setTitle(getResources().getText(R.string.warning_title));
+				       
+				d = builder.create();
+				
+			}break;	
+		}
+		
+		return d;
+	}
+	/** {@inheritDoc} */
+	@Override
+	protected void onPrepareDialog(int id, Dialog dialog) {
+		switch(id) {
+		
+			case NUM_PICKER_DIALOG:
+				((NNumberPickerDialog)dialog).setTimes(lastTimes);
+				break;
+		}
+	}
+
     /**
      * Updates the time 
      */
@@ -377,46 +416,17 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         time += 999;  // round seconds upwards
 		String[] str = TimerUtils.time2str(time);
 		if(str.length == 3)
-			mTimerLabel1.setText(str[0]+":"+str[1]+":"+str[2]);
+			mTimerLabel.setText(str[0]+":"+str[1]+":"+str[2]);
 		else if(str.length == 2)
-			mTimerLabel1.setText(str[0]+":"+str[1]);
+			mTimerLabel.setText(str[0]+":"+str[1]);
 		else if(str.length == 1)
-			mTimerLabel1.setText(str[0]);
+			mTimerLabel.setText(str[0]);
 		else
-			mTimerLabel1.setText("");
+			mTimerLabel.setText("");
 
 		//mTimerLabel2.setText(str[1]);
 	}
 
-	
-	/** {@inheritDoc} */
-	@Override
-	protected Dialog onCreateDialog(int id) 
-	{
-		Dialog d = null;
-		
-		switch(id){
-		
-			case NUM_PICKER_DIALOG:
-				d = new NNumberPickerDialog(this, this, getResources().getString(R.string.InputTitle),lastTimes);
-				break;
-			
-			case ALERT_DIALOG:
-			{
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setMessage(getResources().getText(R.string.warning_text))
-				       .setCancelable(false)
-				       .setPositiveButton(getResources().getText(R.string.warning_button), null)
-				       .setTitle(getResources().getText(R.string.warning_title));
-				       
-				d = builder.create();
-				
-			}break;	
-		}
-		
-		return d;
-	}
-	
 	
 	/** 
 	 * Callback for the number picker dialog

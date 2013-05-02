@@ -88,7 +88,7 @@
 				<p><b>Bodhi Timer</b> is an elegant, minimalist countdown timer.  It was designed mainly for use as a meditation timer but can easily be used for any similar purpose.</p>
 				<p><b>Set the time</b> via the clock button in the top left corner.  You may <b>set presets</b> by choosing a time then holding down on one of the three preset buttons.</p>
 				<p><b>Pause/resume</b> via the buttons in the bottom left corner and stop the timer via the button in the bottom right.  <b>Change preferences</b> via the top-right button.</p>
-				<p>Clicking on the Bodhi leaf changes to one of four circle animations, which can be chosen from the preferences screen.  The Bodhi leaf may also be substituted for a custom image via the preferences screen.</p>
+				<p>Animation may be toggled between a fade-in Bodhi Leaf and one of four circle animations, chosen from the preferences screen.  The Bodhi leaf may also be substituted for a custom image via the preferences screen.</p>
 				<p>You may <b>add a timer widget</b> to your desktop via the App Drawer, or on your lockscreen (Android 4.2+).</p>
 				<p><b>Bodhi Timer</b> is free and open source software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.</p>
 				<p><b><a href="http://www.gnu.org/licenses/gpl.html">http://www.gnu.org/licenses/gpl.html</a></b></p>

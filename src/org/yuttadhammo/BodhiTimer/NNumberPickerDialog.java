@@ -50,6 +50,8 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
 	private SharedPreferences prefs;
 
 	private Context context;
+
+	private int[] time;
 	
     /** Instantiate the dialog box.
      *
@@ -58,7 +60,7 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
      * @param title title of the dialog box
      */
     public NNumberPickerDialog(Context context, OnNNumberPickedListener callBack,
-            String title, int[] time)
+            String title)
     {
         super(context, R.style.NPTheme);
         this.context = context;
@@ -83,10 +85,6 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
 		hour.setAdapter(adapter1);
 		min.setAdapter(adapter1);
 		sec.setAdapter(adapter1);
-		
-		hour.setSelection(time[0]);
-		min.setSelection(time[1]);
-		sec.setSelection(time[2]);
 		
 		Button cancel = (Button) findViewById(R.id.btnCancel);
 		Button ok = (Button) findViewById(R.id.btnOk);
@@ -259,5 +257,12 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putString("pre"+i, s);
 		editor.commit();
+	}
+	
+	public void setTimes(int[] _times) {
+		time = _times;
+		hour.setSelection(time[0]);
+		min.setSelection(time[1]);
+		sec.setSelection(time[2]);
 	}
 }
