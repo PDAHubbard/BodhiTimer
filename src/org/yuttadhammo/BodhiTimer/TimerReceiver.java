@@ -22,20 +22,25 @@ import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 public class TimerReceiver extends BroadcastReceiver {
-	private final static String TAG = TimerReceiver.class.getSimpleName();
-    private final static String CANCEL_NOTIFICATION = "CANCEL_NOTIFICATION";
+	private final static String TAG = "TimerReceiver";
+    final static String CANCEL_NOTIFICATION = "CANCEL_NOTIFICATION";
+	public static MediaPlayer player;
 	
 	@Override
 	public void onReceive(Context context, Intent pintent) 
     {
-        MediaPlayer player = new MediaPlayer();
 
 		NotificationManager mNM = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         // Cancel notification and return...
         if (CANCEL_NOTIFICATION.equals(pintent.getAction())) {
             Log.v(TAG,"Cancelling notification...");
-            player.stop();
+            
+            if(player != null) {
+                Log.v(TAG,"Releasing media player...");
+            	player.release();
+            }
+            
             mNM.cancel(0);
             return;
         }
@@ -43,7 +48,9 @@ public class TimerReceiver extends BroadcastReceiver {
         // ...or display a new one
 
 		Log.v(TAG,"Showing notification...");
-		
+
+        player = new MediaPlayer();
+
         int setTime = pintent.getIntExtra("SetTime",0);
 		String setTimeStr = TimerUtils.time2humanStr(setTime);
 		
@@ -56,8 +63,6 @@ public class TimerReceiver extends BroadcastReceiver {
         boolean vibrate = settings.getBoolean("Vibrate",true);
         String notificationUri = settings.getString("NotificationUri", "android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell);
 		
-        Log.v(TAG,"notification uri: "+notificationUri);
-
 		if(notificationUri.equals("system"))
 			notificationUri = settings.getString("SystemUri", "");
 		else if(notificationUri.equals("file"))
@@ -73,11 +78,10 @@ public class TimerReceiver extends BroadcastReceiver {
 		        .setContentText(textLatest);
 
 		Uri uri = null;
-        // Play a sound!
-        if(notificationUri != ""){
+
+		// Play a sound!
+        if(notificationUri != "")
 			uri = Uri.parse(notificationUri);
-      		mBuilder.setSound(uri);
-        }
 		
         // Vibrate
         if(vibrate){
@@ -125,7 +129,7 @@ public class TimerReceiver extends BroadcastReceiver {
         
 
 
-      	if(settings.getBoolean("overrideSound", false)) {
+      	if(uri != null) {
       		
       		//remove notification sound
       		mBuilder.setSound(null);
@@ -167,6 +171,7 @@ public class TimerReceiver extends BroadcastReceiver {
                 finally {
                 	cancelPlayer.release();
                 }
+            	cancelPlayer.release();
             }
             Log.v(TAG, "Notification duration: " + duration + " ms");
             // Schedule cancellation

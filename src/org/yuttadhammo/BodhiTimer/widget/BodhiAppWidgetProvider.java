@@ -123,7 +123,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
             int appWidgetId) {
-        Log.d("Timer Widget", "updateAppWidget appWidgetId=" + appWidgetId);
+        //Log.d("Timer Widget", "updateAppWidget appWidgetId=" + appWidgetId);
 
         // Construct the RemoteViews object.  It takes the package name (in our case, it's our
         // package, but it needs this because on the other side it's the widget host inflating
@@ -167,7 +167,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         int mLastTime = mSettings.getInt("LastTime",0); 
         
         state = mSettings.getInt("State",0);
-        Log.d("Timer Widget", "state=" + state);
+        //Log.d("Timer Widget", "state=" + state);
     	
         // We still have a timer running!
 		if(then.after(now) && state == TimerActivity.RUNNING){

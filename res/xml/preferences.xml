@@ -80,11 +80,6 @@
 			android:title="@string/stay_awake"
 			android:summary="@string/stay_awake_desc" 
 			android:defaultValue="False" />
-		<CheckBoxPreference
-			android:key="overrideSound"
-			android:title="@string/override_sound"
-			android:summary="@string/override_sound_desc" 
-			android:defaultValue="False" />
 		<Preference
 			android:title="@string/about"
 			android:summary="@string/about_desc"

@@ -36,6 +36,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 // import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,10 +47,8 @@ import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -207,10 +206,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         //enterState(STOPPED);
         
 		mSettings.registerOnSharedPreferenceChangeListener(this);
-		if(getIntent().hasExtra("set")) {
-			Log.d(TAG,"Create From Widget");
-			widget = true;		
-		}
     }
 
 	/** { @inheritDoc} */
@@ -249,7 +244,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         	}break;
         	
         	case STOPPED:
-                mNM.cancelAll();
+        		cancelNotification();
         	case PAUSED:
         	{
         		editor.putLong("TimeStamp", 1);
@@ -268,7 +263,13 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     public void onResume()
     {
     	super.onResume();
-
+    	
+		if(getIntent().hasExtra("set")) {
+			Log.d(TAG,"Create From Widget");
+			widget = true;
+			getIntent().removeExtra("set");
+		}
+    	
     	try {
 			mTimerAnimation.resetAnimationList();
 		} catch (FileNotFoundException e) {
@@ -286,8 +287,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 				getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
 		
     	if(mCurrentState == STOPPED)
-			mNM.cancelAll();
-        
+    		cancelNotification();
+    	
     	if(Integer.parseInt(android.os.Build.VERSION.SDK) >= 11) {
 	    	View rootView = getWindow().getDecorView();
 	    	rootView.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
@@ -331,7 +332,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         	case STOPPED:
                 mNM.cancelAll();
         		enterState(STOPPED);
-        		if(widget == true)
+        		if(widget)
         			showDialog(NUM_PICKER_DIALOG);
         		break;
         	
@@ -682,11 +683,13 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	/** {@inheritDoc} */
 	public void onClick(View v) 
 	{
-		if(mCurrentState == STOPPED)
-			mNM.cancelAll();
+		if(mCurrentState == STOPPED) {
+			cancelNotification();
+		}
 		
 		switch(v.getId()){
 			case R.id.setButton:
+				Log.i("Timer","set button clicked");
 				showDialog(NUM_PICKER_DIALOG);		
 				break;
 
@@ -742,6 +745,23 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			if(mSettings.getBoolean("WakeLock", false)) aquireWakeLock();
 			else releaseWakeLock();
 		}
+	}
+	
+	private void cancelNotification() {
+		// Create intent for cancelling the notification
+        Context appContext = getApplicationContext();
+        Intent intent = new Intent(appContext, TimerReceiver.class);
+        intent.setAction(TimerReceiver.CANCEL_NOTIFICATION);
+
+        // Cancel the pending cancellation and create a new one
+        PendingIntent pendingCancelIntent =
+            PendingIntent.getBroadcast(appContext, 0, intent,
+                                       PendingIntent.FLAG_CANCEL_CURRENT);
+        AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            alarmMgr.set(AlarmManager.ELAPSED_REALTIME,
+                         SystemClock.elapsedRealtime(),
+                         pendingCancelIntent);
+
 	}
 		
 }
