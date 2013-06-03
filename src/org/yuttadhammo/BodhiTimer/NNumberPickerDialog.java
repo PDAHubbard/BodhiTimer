@@ -4,32 +4,40 @@ import java.util.Set;
 
 import org.yuttadhammo.BodhiTimer.R;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationSet;
+import android.view.animation.TranslateAnimation;
 
 import android.widget.Button;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.Gallery;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 /** Dialog box with an arbitrary number of number pickers */
-public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLongClickListener {
+public class NNumberPickerDialog extends Activity implements OnClickListener,OnLongClickListener {
 
     public interface OnNNumberPickedListener {
         void onNumbersPicked(int[] number);
     }
 
-    private final OnNNumberPickedListener mCallback;
 
     private int hsel;
     private int msel;
@@ -59,26 +67,27 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
      * @param callBack callback function to get the numbers you requested
      * @param title title of the dialog box
      */
-    public NNumberPickerDialog(Context context, OnNNumberPickedListener callBack,
-            String title)
+    public void onCreate(Bundle savedInstanceState)
     {
-        super(context, R.style.NPTheme);
-        this.context = context;
-        mCallback = callBack;
+    	super.onCreate(savedInstanceState);
+        this.context = this;
         
+        setContentView(R.layout.n_number_picker_dialog);
+        
+        LinearLayout scrollView = (LinearLayout) findViewById(R.id.container);
+        
+		Animation slideDown = slideDown(); 
+		scrollView.startAnimation(slideDown);
+		scrollView.setVisibility(View.VISIBLE);
 
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.n_number_picker_dialog, null);
-        setContentView(view);
         
 		String [] numbers = new String[61];
 		for(int i = 0; i < 61; i++) {
 			numbers[i] = Integer.toString(i);
 		}
-		hour = (Gallery) view.findViewById(R.id.gallery_hour);
-		min = (Gallery) view.findViewById(R.id.gallery_min);
-		sec = (Gallery) view.findViewById(R.id.gallery_sec);
+		hour = (Gallery) findViewById(R.id.gallery_hour);
+		min = (Gallery) findViewById(R.id.gallery_min);
+		sec = (Gallery) findViewById(R.id.gallery_sec);
 		
 		ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(context, R.layout.gallery_item, numbers);        
 
@@ -136,20 +145,19 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
 		
 		switch(v.getId()){
 			case R.id.btnOk:
-		        if (mCallback != null) {
-					
-					hsel = hour.getSelectedItemPosition();
-					msel = min.getSelectedItemPosition();
-					ssel = sec.getSelectedItemPosition();
-					
-		            int[] values = {hsel,msel,ssel};
-		            mCallback.onNumbersPicked(values);
-		        }
-		        dismiss();
-		        break;
+
+				hsel = hour.getSelectedItemPosition();
+				msel = min.getSelectedItemPosition();
+				ssel = sec.getSelectedItemPosition();
+				
+	            int[] values = {hsel,msel,ssel};
+		        Intent i = new Intent();
+		        i.putExtra("times",values);
+			    setResult(Activity.RESULT_OK, i);
+		        finish();
+	            break;
 			case R.id.btnCancel:
-	            mCallback.onNumbersPicked(null);
-				dismiss();
+				finish();
 				break;
 			case R.id.btn1:
 				setFromPre(i1);
@@ -183,19 +191,18 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
 			return;
 		}
 		
-        if (mCallback != null) {
-    		int h = Integer.parseInt(ts.substring(0, 2));
-    		int m = Integer.parseInt(ts.substring(3, 5));
-    		int s = Integer.parseInt(ts.substring(6, 8));
-			
-    		if(h != 0 || m != 0 || s != 0) {
-	            int[] values = {h,m,s};
-	            mCallback.onNumbersPicked(values);
-	        	dismiss();
-    		}
-    		else
-    			Toast.makeText(context, context.getString(R.string.longclick),Toast.LENGTH_LONG).show();
-        }
+		int h = Integer.parseInt(ts.substring(0, 2));
+		int m = Integer.parseInt(ts.substring(3, 5));
+		int s = Integer.parseInt(ts.substring(6, 8));
+		
+		if(h != 0 || m != 0 || s != 0) {
+            int[] values = {h,m,s};
+	        Intent i = new Intent();
+	        i.putExtra("times",values);
+		    setResult(Activity.RESULT_OK, i);
+	        finish();		}
+		else
+			Toast.makeText(context, context.getString(R.string.longclick),Toast.LENGTH_LONG).show();
 	}
 
 	/** {@inheritDoc} 
@@ -265,4 +272,77 @@ public class NNumberPickerDialog extends Dialog implements OnClickListener,OnLon
 		min.setSelection(time[1]);
 		sec.setSelection(time[2]);
 	}
+	
+
+	public static Animation slideDown() {
+
+        AnimationSet set = new AnimationSet(true);
+
+        Animation animation = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF,
+                0.0f, Animation.RELATIVE_TO_SELF, -1.0f,
+                Animation.RELATIVE_TO_SELF, 0.0f);
+        animation.setDuration(200);
+        animation.setAnimationListener(new AnimationListener() {
+
+            @Override
+            public void onAnimationStart(Animation animation) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                // TODO Auto-generated method stub
+                //Log.d(TAG,"sliding down ended");
+
+            }
+        });
+        set.addAnimation(animation);
+
+        return animation;
+    }
+
+	public static Animation slideUp(final View view) {
+
+        AnimationSet set = new AnimationSet(true);
+
+        Animation animation = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF,
+                0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
+                Animation.RELATIVE_TO_SELF, -1.0f);
+        animation.setDuration(200);
+        animation.setAnimationListener(new AnimationListener() {
+
+            @Override
+            public void onAnimationStart(Animation animation) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                // TODO Auto-generated method stub
+                view.clearAnimation();
+                view.setVisibility(View.GONE);
+            }
+        });
+        set.addAnimation(animation);
+
+        return animation;
+
+	}
+	
 }

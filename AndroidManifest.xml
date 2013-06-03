@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="org.yuttadhammo.BodhiTimer"
-      android:versionName="2.5" android:versionCode="23">
+      android:versionName="2.6" android:versionCode="24">
     
 	<uses-sdk android:minSdkVersion="5" android:targetSdkVersion="17" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -26,6 +26,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity 
+            android:name=".NNumberPickerDialog"
+ 			android:theme="@style/Theme.Transparent"
+            /> 
         <activity android:label="Preferences" 
             android:name=".TimerPrefActivity"
 			android:theme="@android:style/Theme.NoTitleBar" 
@@ -49,6 +53,7 @@
 		    </intent-filter>
 		</activity>  	 	
 		<receiver android:name=".TimerReceiver" ></receiver>
+    	<service android:name="org.yuttadhammo.BodhiTimer.NoticeService" />
 	</application>
 
 

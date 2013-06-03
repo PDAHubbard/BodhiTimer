@@ -41,7 +41,7 @@ public class TimerReceiver extends BroadcastReceiver {
             	player.release();
             }
             
-            mNM.cancel(0);
+            mNM.cancelAll();
             return;
         }
 

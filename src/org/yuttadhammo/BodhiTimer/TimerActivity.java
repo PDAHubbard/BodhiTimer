@@ -17,18 +17,15 @@ import org.yuttadhammo.BodhiTimer.NNumberPickerDialog.OnNNumberPickedListener;
 import java.io.FileNotFoundException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -36,11 +33,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 // import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.PowerManager.WakeLock;
@@ -71,7 +65,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private final static boolean LOG = true;
 	
 	/** Macros for our dialogs */
-	private final static int NUM_PICKER_DIALOG = 0, ALERT_DIALOG = 1;
+	private final static int ALERT_DIALOG = 1;
 	/** debug string */
 	private final String TAG = getClass().getSimpleName();
 	
@@ -86,44 +80,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	
 	/** The current timer time */
 	private int mTime = 0;
-	
-	/** Internal increment class for the timer */
-	private Timer mTimer = null;
-
-	/** Handler for the message from the timer service */
-	private Handler mHandler = new Handler() {
-		
-		@Override
-        public void handleMessage(Message msg) {
-			
-			// The timer is finished
-			if(msg.arg1 <= 0){
-				
-				if(mTimer != null){
-					if(LOG) Log.v(TAG,"rcvd a <0 msg = " + msg.arg1);
-					
-					Context context = getApplicationContext();
-					CharSequence text = getResources().getText(R.string.Notification);
-					Toast.makeText(context, text,Toast.LENGTH_SHORT).show();
-					
-					if(mSettings.getBoolean("AutoRestart", false)) {
-						timerStop();
-						mTime = mLastTime;
-						timerStart(mLastTime,false);
-					}
-					else
-						timerStop();
-				}
-				
-			// Update the time
-			}else{
-				mTime = msg.arg1;
-				
-				//enterState(RUNNING);
-				onUpdateTime();
-			}
-		}
-    };
 
 	/** To save having to traverse the view tree */
 	private ImageButton mPauseButton, mCancelButton, mSetButton, mPrefButton;
@@ -150,6 +106,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private boolean widget;
 
 	private int[] lastTimes;
+
+	private TimerActivity context;
+
+	private PendingIntent pi;
 	
 	/** Called when the activity is first created.
      *	{ @inheritDoc} 
@@ -161,6 +121,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         //RelativeLayout main = (RelativeLayout)findViewById(R.id.mainLayout);
+        
+        context = this;
         
         if(Integer.parseInt(android.os.Build.VERSION.SDK) >= 11) {
         	this.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
@@ -187,7 +149,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		mTimerLabel = (TextView)findViewById(R.id.text_top);
 
 		mTimerAnimation = (TimerAnimation)findViewById(R.id.mainImage);
-		mTimerAnimation.setActivity(this);
+		mTimerAnimation.setOnClickListener(this);
 		
         // Store some useful values
         mSettings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -236,10 +198,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         	case RUNNING:
         	{
 	        	Log.i(TAG,"pause while running: "+new Date().getTime() + mTime);
-        		if(mTimer != null){
-	        		mTimer.cancel();
-	        		editor.putLong("TimeStamp", new Date().getTime() + mTime);
-	        	}
+        		//editor.putLong("TimeStamp", new Date().getTime() + mTime);
+	            unregisterReceiver(onTick);
         		
         	}break;
         	
@@ -252,7 +212,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         }
         
         editor.commit();
-        
+
         releaseWakeLock();
     }
    
@@ -319,13 +279,18 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
             	
             	// We still have a timer running!
             	if(then.after(now)){
-            		int delta = (int)(then.getTime() - now.getTime());		
-            		timerStart(delta,false);
+    	        	Log.i(TAG,"Still have a timer");
+    	    		mTime = (int) (then.getTime() - now.getTime());
+
             		mCurrentState = RUNNING;
+            		// Internal thread to properly update the GUI
+            		IntentFilter filter=new IntentFilter(NoticeService.BROADCAST);
+            		
+            		filter.setPriority(2);
+            		registerReceiver(onTick, filter);
             	// All finished
             	}else{
-            		clearTime();
-            		enterState(STOPPED);
+            		timerStop();
             	}
             	break;
         	
@@ -333,7 +298,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
                 mNM.cancelAll();
         		enterState(STOPPED);
         		if(widget)
-        			showDialog(NUM_PICKER_DIALOG);
+        			showPicker();
         		break;
         	
         	case PAUSED:
@@ -345,7 +310,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         }
 	}
 
-    @Override
+	@Override
     public boolean onKeyDown(int keycode, KeyEvent e) {
         mNM.cancelAll();
         switch(keycode) {
@@ -356,45 +321,19 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         return super.onKeyDown(keycode, e);
     }
 
-    
-	/** {@inheritDoc} */
-	@Override
-	protected Dialog onCreateDialog(int id) 
-	{
-		Dialog d = null;
-		
-		switch(id){
-		
-			case NUM_PICKER_DIALOG:
-				d = new NNumberPickerDialog(this, this, getResources().getString(R.string.InputTitle));
-				break;
-			
-			case ALERT_DIALOG:
-			{
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setMessage(getResources().getText(R.string.warning_text))
-				       .setCancelable(false)
-				       .setPositiveButton(getResources().getText(R.string.warning_button), null)
-				       .setTitle(getResources().getText(R.string.warning_title));
-				       
-				d = builder.create();
-				
-			}break;	
-		}
-		
-		return d;
-	}
-	/** {@inheritDoc} */
-	@Override
-	protected void onPrepareDialog(int id, Dialog dialog) {
-		switch(id) {
-		
-			case NUM_PICKER_DIALOG:
-				((NNumberPickerDialog)dialog).setTimes(lastTimes);
-				break;
+	protected void  onActivityResult (int requestCode, int resultCode, Intent  data) {
+		if(resultCode == Activity.RESULT_OK) {
+			int[] values = data.getIntArrayExtra("times");
+			this.onNumbersPicked(values);
 		}
 	}
 
+    private void showPicker() {
+		Intent i = new Intent(this, NNumberPickerDialog.class);
+    	startActivityForResult(i, 1);
+	}
+
+	
     /**
      * Updates the time 
      */
@@ -541,6 +480,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private void stopAlarmTimer(){
 		if(LOG) Log.v(TAG,"Stopping the alarm timer ...");		
 		mAlarmMgr.cancel(mPendingIntent);
+		mAlarmMgr.cancel(pi);
+		mNM.cancelAll();
 	}
 	
 	/**
@@ -549,12 +490,11 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private void timerStop()
 	{		
 		if(LOG) Log.v(TAG,"Timer stopped");
-		
+		stopAlarmTimer();
 		clearTime();
 		
 		// Stop our timer service
 		enterState(STOPPED);		
-		mTimer.cancel();
 		
 		releaseWakeLock();
 	}
@@ -620,21 +560,15 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		c.set(Calendar.MILLISECOND, 0);
 		c.add(Calendar.SECOND,1);
 		
-		PendingIntent pi = PendingIntent.getBroadcast(this, 0,
+		pi = PendingIntent.getBroadcast(this, 0,
 				new Intent("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE"), PendingIntent.FLAG_UPDATE_CURRENT);
-		final AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-		alarmManager.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 1000, pi);
-		
+		mAlarmMgr.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 100, pi);
+
 		// Internal thread to properly update the GUI
-		mTimer = new Timer();	
-        
-		mTimer.scheduleAtFixedRate( new TimerTask(){
-	        	public void run() {
-	          		timerTic();
-	        	}
-	      	},
-	      	0,
-	      	TIMER_TIC);
+		IntentFilter filter=new IntentFilter(NoticeService.BROADCAST);
+		
+		filter.setPriority(2);
+		registerReceiver(onTick, filter);
 		
 		aquireWakeLock();
 	}
@@ -652,25 +586,11 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private void pauseTimer()
 	{
 		if(LOG) Log.v(TAG,"Pausing the timer...");
-		
-		mTimer.cancel();
-		mTimer = null;
+
 		
 		stopAlarmTimer();
 		
 		enterState(PAUSED);
-	}
-
-	/** Called whenever the internal timer is updated */
-	protected void timerTic() 
-	{
-		mTime -= TIMER_TIC;
-		
-		if(mHandler != null){
-			Message msg = new Message();
-			msg.arg1 = mTime;			
-			mHandler.sendMessage(msg);
-		}
 	}
 	
 	/** Clears the time, sets the image and label to zero */
@@ -690,7 +610,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		switch(v.getId()){
 			case R.id.setButton:
 				Log.i("Timer","set button clicked");
-				showDialog(NUM_PICKER_DIALOG);		
+				showPicker();
 				break;
 
 			case R.id.prefButton:
@@ -763,5 +683,30 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
                          pendingCancelIntent);
 
 	}
-		
+	
+	private BroadcastReceiver onTick = new BroadcastReceiver() {
+		public void onReceive(Context ctxt, Intent i) {
+			mTime -= TIMER_TIC;
+			if(LOG) Log.v(TAG,"tick " + mTime);
+			
+			if(mTime <= 0){
+				
+				if(LOG) Log.v(TAG,"rcvd a <0 msg = " + mTime);
+				CharSequence text = getResources().getText(R.string.Notification);
+				Toast.makeText(context, text,Toast.LENGTH_SHORT).show();
+				timerStop();
+				
+				if(mSettings.getBoolean("AutoRestart", false)) {
+					if(LOG) Log.v(TAG,"Restarting at " + mLastTime);
+					mTime = mLastTime;
+					timerStart(mLastTime,false);
+				}
+				
+			// Update the time
+			}else{
+				//enterState(RUNNING);
+				onUpdateTime();
+			}
+		}
+	};
 }
