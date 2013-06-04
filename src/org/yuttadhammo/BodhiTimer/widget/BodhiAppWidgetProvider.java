@@ -46,7 +46,8 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	* Sending this broadcast intent will cause the clock widgets to update.
 	*/
 	public static String ACTION_CLOCK_UPDATE = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
-
+	public static String ACTION_CLOCK_CANCEL = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_CANCEL";
+	
 	@Override
 	public void onEnabled(Context context) {
 		super.onEnabled(context);
@@ -79,7 +80,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	
 		final String action = intent.getAction();
 	
-		if (ACTION_CLOCK_UPDATE.equals(action)){
+		if (ACTION_CLOCK_UPDATE.equals(action) || ACTION_CLOCK_CANCEL.equals(action)){
             //Log.d("Timer Widget", "received broadcast");
 			final ComponentName appWidgets = new ComponentName(context.getPackageName(), getClass().getName());
 			final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -191,7 +192,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         intent.putExtra("set", "true");
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         
     	views.setOnClickPendingIntent(R.id.mainImage, pendingIntent);
     	

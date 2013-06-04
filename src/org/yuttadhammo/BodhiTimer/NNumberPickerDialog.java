@@ -95,6 +95,12 @@ public class NNumberPickerDialog extends Activity implements OnClickListener,OnL
 		min.setAdapter(adapter1);
 		sec.setAdapter(adapter1);
 		
+		int[] times = getIntent().getIntArrayExtra("times");
+		
+		hour.setSelection(times[0]);
+		min.setSelection(times[1]);
+		sec.setSelection(times[2]);
+		
 		Button cancel = (Button) findViewById(R.id.btnCancel);
 		Button ok = (Button) findViewById(R.id.btnOk);
 		cancel.setOnClickListener(this);

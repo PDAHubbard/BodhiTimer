@@ -41,6 +41,7 @@
 		    </intent-filter>
             <intent-filter>
                 <action android:name="org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE" />
+                <action android:name="org.yuttadhammo.BodhiTimer.ACTION_CLOCK_CANCEL" />
                 <action android:name="android.intent.action.TIME_CHANGED" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>

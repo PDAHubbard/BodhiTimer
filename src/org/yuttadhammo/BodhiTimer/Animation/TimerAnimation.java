@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
@@ -87,6 +88,7 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 	public int getIndex(){ return mIndex;}
 	
 	public void updateImage(int time,int max){
+		//Log.v(this.getClass().getCanonicalName(),"time: "+time+" "+max);
 		mLastTime = time;
 		mLastMax = max;
 
@@ -95,12 +97,7 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 
 	@Override
 	public void onDraw(Canvas canvas){
-		if(clicked) {
-			clicked = false;
-			mDrawings.get(mIndex).updateImage(canvas, mLastMax, mLastMax);
-		}
-		else
-			mDrawings.get(mIndex).updateImage(canvas, mLastTime, mLastMax);
+		mDrawings.get(mIndex).updateImage(canvas, mLastTime, mLastMax);
 	}
 	
 	public void onClick(View v){

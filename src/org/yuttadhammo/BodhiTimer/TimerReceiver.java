@@ -123,7 +123,7 @@ public class TimerReceiver extends BroadcastReceiver {
 
         // Cancel the pending cancellation and create a new one
         PendingIntent pendingCancelIntent =
-            PendingIntent.getBroadcast(appContext, 0, intent,
+            PendingIntent.getBroadcast(appContext, 2, intent,
                                        PendingIntent.FLAG_CANCEL_CURRENT);
 
         
@@ -205,7 +205,5 @@ public class TimerReceiver extends BroadcastReceiver {
 		// mId allows you to update the notification later on.
 		mNotificationManager.notify(0, mBuilder.build());
 
-
-		
 	}
 }

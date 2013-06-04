@@ -110,6 +110,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private TimerActivity context;
 
 	private PendingIntent pi;
+
+	public static final String BROADCAST = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
 	
 	/** Called when the activity is first created.
      *	{ @inheritDoc} 
@@ -164,6 +166,11 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         lastTimes[0] = mSettings.getInt("last_hour", 0);
         lastTimes[1] = mSettings.getInt("last_min", 0);
         lastTimes[2] = mSettings.getInt("last_sec", 0);
+ 
+		// register receiver to update the GUI
+		IntentFilter filter=new IntentFilter(BROADCAST);
+		filter.setPriority(2);
+		registerReceiver(onTick, filter);
         
         //enterState(STOPPED);
         
@@ -223,6 +230,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     public void onResume()
     {
     	super.onResume();
+		Log.d(TAG,"Resuming");
     	
 		if(getIntent().hasExtra("set")) {
 			Log.d(TAG,"Create From Widget");
@@ -263,7 +271,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     	// check the timestamp from the last update and start the timer.
     	// assumes the data has already been loaded?   
         mLastTime = mSettings.getInt("LastTime",0);    
-        
+		
+        Log.d(TAG,"Last Time: "+mLastTime);
+       
         mTimerAnimation.setIndex(mSettings.getInt("DrawingIndex",0));
         int state = mSettings.getInt("State",0);
         
@@ -271,7 +281,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         {
         	case RUNNING:
 	        	Log.i(TAG,"Resume while running: "+mSettings.getLong("TimeStamp", -1));
-        		widget = false;
         		long timeStamp = mSettings.getLong("TimeStamp", -1);
                 
         		Date now = new Date();
@@ -283,11 +292,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     	    		mTime = (int) (then.getTime() - now.getTime());
 
             		mCurrentState = RUNNING;
-            		// Internal thread to properly update the GUI
-            		IntentFilter filter=new IntentFilter(NoticeService.BROADCAST);
-            		
-            		filter.setPriority(2);
-            		registerReceiver(onTick, filter);
             	// All finished
             	}else{
             		timerStop();
@@ -302,12 +306,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         		break;
         	
         	case PAUSED:
-        		widget = false;
         		mTime = mSettings.getInt("CurrentTime",0);
         		onUpdateTime();
         		enterState(PAUSED);
         		break;  	
         }
+		widget = false;
 	}
 
 	@Override
@@ -324,12 +328,13 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	protected void  onActivityResult (int requestCode, int resultCode, Intent  data) {
 		if(resultCode == Activity.RESULT_OK) {
 			int[] values = data.getIntArrayExtra("times");
-			this.onNumbersPicked(values);
+			onNumbersPicked(values);
 		}
 	}
 
     private void showPicker() {
 		Intent i = new Intent(this, NNumberPickerDialog.class);
+		i.putExtra("times", lastTimes);
     	startActivityForResult(i, 1);
 	}
 
@@ -383,6 +388,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		int sec = number[2];
 		
 		mLastTime = hour*60*60*1000 + min*60*1000 + sec*1000;
+
+		Log.v(TAG,"Picked numbers: "+mLastTime);
 		
 		lastTimes = new int[3];
 		
@@ -393,7 +400,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		// put last set time to prefs
 		
 		Editor mSettingsEdit = mSettings.edit();
-		mSettingsEdit.putInt("LAST_SET_TIME", mLastTime);
+		mSettingsEdit.putInt("LastTime", mLastTime);
 		mSettingsEdit.commit();
 		
 		// Check to make sure the phone isn't set to silent
@@ -473,31 +480,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		mCancelButton.setAlpha(i);		
 		mPrefButton.setAlpha(i);		
 	}
-
-	/**
-	 * Cancels the alarm portion of the timer
-	 */
-	private void stopAlarmTimer(){
-		if(LOG) Log.v(TAG,"Stopping the alarm timer ...");		
-		mAlarmMgr.cancel(mPendingIntent);
-		mAlarmMgr.cancel(pi);
-		mNM.cancelAll();
-	}
-	
-	/**
-	 * Stops the timer
-	 */
-	private void timerStop()
-	{		
-		if(LOG) Log.v(TAG,"Timer stopped");
-		stopAlarmTimer();
-		clearTime();
-		
-		// Stop our timer service
-		enterState(STOPPED);		
-		
-		releaseWakeLock();
-	}
 	
 	private void releaseWakeLock(){
 		// Remove the wakelock
@@ -549,7 +531,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		    if(LOG) Log.v(TAG,"Starting the timer service ...");
 		    Intent intent = new Intent( getApplicationContext(), TimerReceiver.class);
 		    intent.putExtra("SetTime",mLastTime);
-		    mPendingIntent = PendingIntent.getBroadcast( getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+		    mPendingIntent = PendingIntent.getBroadcast( getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		    mAlarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + time, mPendingIntent);	    
 		}
 
@@ -560,21 +542,31 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		c.set(Calendar.MILLISECOND, 0);
 		c.add(Calendar.SECOND,1);
 		
-		pi = PendingIntent.getBroadcast(this, 0,
+		pi = PendingIntent.getBroadcast(this, 1,
 				new Intent("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE"), PendingIntent.FLAG_UPDATE_CURRENT);
 		mAlarmMgr.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 100, pi);
 
-		// Internal thread to properly update the GUI
-		IntentFilter filter=new IntentFilter(NoticeService.BROADCAST);
-		
-		filter.setPriority(2);
-		registerReceiver(onTick, filter);
-		
 		aquireWakeLock();
+	}
+
+	
+	/**
+	 * Stops the timer
+	 */
+	private void timerStop()
+	{		
+		if(LOG) Log.v(TAG,"Timer stopped");
+		stopAlarmTimer();
+		clearTime();
+		
+		// Stop our timer service
+		enterState(STOPPED);		
+		
+		releaseWakeLock(); 
 	}
 	
 	/** Resume the time after being paused */
-	private void resumeTimer() 
+	private void timerResume() 
 	{
 		if(LOG) Log.v(TAG,"Resuming the timer...");
 			
@@ -583,7 +575,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	}
 	
 	/** Pause the timer and stop the timer service */
-	private void pauseTimer()
+	private void timerPause()
 	{
 		if(LOG) Log.v(TAG,"Pausing the timer...");
 
@@ -598,8 +590,23 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	{
 		mTime = 0;
 		onUpdateTime();
+		Intent broadcast = new Intent();
+        broadcast.setAction("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_CANCEL");
+		sendBroadcast(broadcast);
 	}
 
+
+	/**
+	 * Cancels the alarm portion of the timer
+	 */
+	private void stopAlarmTimer(){
+		if(LOG) Log.v(TAG,"Stopping the alarm timer ...");		
+		mAlarmMgr.cancel(mPendingIntent);
+		mAlarmMgr.cancel(pi);
+		mNM.cancelAll();
+	}
+
+	
 	/** {@inheritDoc} */
 	public void onClick(View v) 
 	{
@@ -623,10 +630,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			case R.id.pauseButton:
 				switch(mCurrentState){
 					case RUNNING:
-						pauseTimer();
+						timerPause();
 						break;
 					case PAUSED:
-						resumeTimer();
+						timerResume();
 						break;
 					case STOPPED:
 						timerStart(mLastTime,true);
@@ -635,23 +642,23 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 				break;
 			
 			case R.id.cancelButton:
-				mNM.cancelAll();
-			    Intent intent = new Intent( getApplicationContext(), TimerReceiver.class);
-			    mPendingIntent = PendingIntent.getBroadcast( getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 				
 				// We need to be careful to not cancel timers
 				// that are not running (e.g. if we're paused)
 				switch(mCurrentState){
 					case RUNNING:
 						timerStop();
-						stopAlarmTimer();
 						break;
 					case PAUSED:
 						clearTime();
 						enterState(STOPPED);
 						break;
 				}	
-				break;
+				mNM.cancelAll();
+			    Intent intent = new Intent( getApplicationContext(), TimerReceiver.class);
+			    mPendingIntent = PendingIntent.getBroadcast( getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+			    break;
 		}
 	}
 	
@@ -687,13 +694,17 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private BroadcastReceiver onTick = new BroadcastReceiver() {
 		public void onReceive(Context ctxt, Intent i) {
 			mTime -= TIMER_TIC;
-			if(LOG) Log.v(TAG,"tick " + mTime);
 			
-			if(mTime <= 0){
+			if(mTime <= TIMER_TIC){
 				
-				if(LOG) Log.v(TAG,"rcvd a <0 msg = " + mTime);
-				CharSequence text = getResources().getText(R.string.Notification);
-				Toast.makeText(context, text,Toast.LENGTH_SHORT).show();
+				Log.e(TAG,"Time up");
+				if(mCurrentState == RUNNING) {
+					CharSequence text = getResources().getText(R.string.Notification);
+					Toast.makeText(context, text,Toast.LENGTH_SHORT).show();
+				}
+				else 
+					Log.e(TAG,"Last Tick");
+				
 				timerStop();
 				
 				if(mSettings.getBoolean("AutoRestart", false)) {
