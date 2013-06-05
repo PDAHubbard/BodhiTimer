@@ -41,14 +41,16 @@ class BodhiLeaf implements TimerAnimation.TimerDrawing
 		// get custom bitmap
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		if(!prefs.getBoolean("custom_bmp", false) || prefs.getString("bmp_url","").length() == 0) {
-			Resources resources = context.getResources();
-			mCupBitmap = BitmapFactory.decodeResource(resources, R.drawable.leaf);
+			mCupBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.leaf);
 		}
 		else {
 			String bmpUrl = prefs.getString("bmp_url", "");
 			Uri selectedImage = Uri.parse(bmpUrl);
             InputStream imageStream = context.getContentResolver().openInputStream(selectedImage);
             mCupBitmap = BitmapFactory.decodeStream(imageStream);
+    		if(mCupBitmap == null) {
+    			mCupBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.leaf);
+    		}
 		}
 		mHeight = mCupBitmap.getHeight();
 		mWidth = mCupBitmap.getWidth();

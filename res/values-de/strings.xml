@@ -28,10 +28,10 @@
 
 	<string name="notification_vibrate">Vibration bei Benachrichtigung</string>
 	<string name="notification_vibrate_desc">Vibriere bei Ablauf des Timers.</string>
-	
+
 	<string name="led_notification">LED Benachrichtigung</string>
 	<string name="led_notification_desc">Lässt die LED während der Benachrichtigung blinken.</string>
-
+		
 	<string name="auto_clear">Automatisch löschen</string>
 	<string name="auto_clear_desc">Benachrichtigung nach ein paar Sekunden automatisch löschen.</string>
 
@@ -68,14 +68,7 @@
 	<!-- About -->
 	<string name="close">Schließen</string>
 	<string name="about">Info</string>
-	<string name="about_website">Bodhi Timer auf GitHub</string>
 	<string name="about_title">Über Bodhi Timer</string>
-	<string name="about_details_desc">Bodhi Timer ist ein eleganter, minimalistischer Countdown Timer, hauptsächlich als Meditationstimer gedacht, aber einfach für jeden ähnlichen Zweck einsetzbar.\n\nSetz die Zeit über das Uhr-Icon oben links, pausieren/weitermachen über die Knöpfe unten links, und stopp den Timer über den Knopf unten rechts. Der Knopf oben rechts ist der Einstellungsknopf.\n\nKlicken auf das Bodhiblatt wechselt auf eine von vier Kreisanimationen, die im Einstellungsbildschirm ausgewählt werden können.</string>
-	<string name="about_details_licence">Bodhi Timer ist freie und Open Source Software: Du kannst es unter den Bedingungen der GNU General Public License, von der Free Software Foundation veröffentlicht, Version 3 oder jede spätere Version weiterverbreiten und/oder verändern.</string>
-	<string name="about_details_url">http://www.gnu.org/licenses/gpl.html</string>
-	<string name="about_site">Besorg die aktuelle Version des Quellcodes auf GitHub:</string>
-	<string name="about_site_url">https://github.com/yuttadhammo/BodhiTimer</string>	
-	<string name="about_details_upstream">Bodhi Timer ist ein Fork der Open Source TeaTimer App von Ralph Gootee &lt;rgootee@gmail.com&gt;, die auch auf GitHub verfügbar ist:\n\nhttps://github.com/ralphleon/TeaTimer</string>
 
 	<string name="zero">00</string>
 	<string name="set">Setzen</string>

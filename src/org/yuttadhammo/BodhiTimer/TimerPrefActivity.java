@@ -46,6 +46,7 @@ public class TimerPrefActivity extends PreferenceActivity
 	private int SELECT_RINGTONE = 123;
 	private int SELECT_PHOTO = 456;
 	private int SELECT_FILE;
+	private String lastToneType;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +78,8 @@ public class TimerPrefActivity extends PreferenceActivity
 		
     	player = new MediaPlayer();
     	
+    	lastToneType = settings.getString("NotificationUri", (String)entryValues[1]);
+    	
     	tone.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 			
 			@Override
@@ -107,6 +110,9 @@ public class TimerPrefActivity extends PreferenceActivity
     	                        Toast.LENGTH_SHORT).show();
     	            }
     	        }
+    	    	else
+    	            lastToneType = (String) newValue;
+    	    		
 				return true;
 			}
 
@@ -129,6 +135,9 @@ public class TimerPrefActivity extends PreferenceActivity
 						notificationUri = settings.getString("SystemUri", "");
 					else if(notificationUri.equals("file"))
 						notificationUri = settings.getString("FileUri", "");
+					if(notificationUri.equals(""))
+						return false;
+					Log.v(TAG,"Playing Uri: "+notificationUri);
                     player.reset();
                     player.setDataSource(context, Uri.parse(notificationUri));
                     player.prepare();
@@ -141,12 +150,13 @@ public class TimerPrefActivity extends PreferenceActivity
 						}
 	                });
 	                player.start();
+					preference.setTitle(context.getString(R.string.playing_sound));
+					preference.setSummary(context.getString(R.string.playing_sound_desc));
                 } catch (IOException e) {
 					// TODO Auto-generated catch block
+                	
 					e.printStackTrace();
 				}
-				preference.setTitle(context.getString(R.string.playing_sound));
-				preference.setSummary(context.getString(R.string.playing_sound_desc));
 				
                 return false;
 			}
@@ -284,23 +294,30 @@ public class TimerPrefActivity extends PreferenceActivity
     {
         Uri uri = null;
         Editor mSettingsEdit = settings.edit();
-		if (resultCode == Activity.RESULT_OK && requestCode == SELECT_RINGTONE )
-        {
+		if (resultCode == Activity.RESULT_OK && requestCode == SELECT_RINGTONE ) {
         	uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-            Log.i("Timer","Got ringtone "+uri.toString()); 
-        	if (uri != null)
+        	if (uri != null) {
+                Log.i("Timer","Got ringtone "+uri.toString()); 
         		mSettingsEdit.putString("SystemUri", uri.toString());
-        	else
+	            lastToneType = "system";
+       	}
+        	else {
         		mSettingsEdit.putString("SystemUri", "");
+        		mSettingsEdit.putString("NotificationUri",lastToneType);
+        	}
         }
         else if (resultCode == Activity.RESULT_OK && requestCode == SELECT_FILE) {
             // Get the Uri of the selected file 
             uri = intent.getData();
-            Log.d(TAG, "File Path: " + uri);
-        	if (uri != null)
+        	if (uri != null) {
+                Log.i(TAG, "File Path: " + uri);
         		mSettingsEdit.putString("FileUri", uri.toString());
-        	else
+	            lastToneType = "file";
+        	}
+       		else {
         		mSettingsEdit.putString("FileUri", "");
+        		mSettingsEdit.putString("NotificationUri",lastToneType);
+        	}
         }
         else if (resultCode == Activity.RESULT_OK && requestCode == SELECT_PHOTO ){
             uri = intent.getData();

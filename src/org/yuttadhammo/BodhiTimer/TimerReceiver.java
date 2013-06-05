@@ -38,7 +38,17 @@ public class TimerReceiver extends BroadcastReceiver {
             
             if(player != null) {
                 Log.v(TAG,"Releasing media player...");
-            	player.release();
+                try{
+                	player.release();
+                    player = null;
+                }
+                catch(Exception e) {
+                	e.printStackTrace();
+                    player = null;
+                }
+                finally {
+                	// do nothing
+                }
             }
             
             mNM.cancelAll();

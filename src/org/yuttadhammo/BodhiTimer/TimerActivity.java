@@ -167,11 +167,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         lastTimes[1] = mSettings.getInt("last_min", 0);
         lastTimes[2] = mSettings.getInt("last_sec", 0);
  
-		// register receiver to update the GUI
-		IntentFilter filter=new IntentFilter(BROADCAST);
-		filter.setPriority(2);
-		registerReceiver(onTick, filter);
-        
         //enterState(STOPPED);
         
 		mSettings.registerOnSharedPreferenceChangeListener(this);
@@ -206,7 +201,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         	{
 	        	Log.i(TAG,"pause while running: "+new Date().getTime() + mTime);
         		//editor.putLong("TimeStamp", new Date().getTime() + mTime);
-	            unregisterReceiver(onTick);
         		
         	}break;
         	
@@ -221,6 +215,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         editor.commit();
 
         releaseWakeLock();
+        unregisterReceiver(onTick);
     }
    
 
@@ -231,7 +226,13 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     {
     	super.onResume();
 		Log.d(TAG,"Resuming");
-    	
+
+		// register receiver to update the GUI
+		IntentFilter filter=new IntentFilter(BROADCAST);
+		filter.setPriority(2);
+		registerReceiver(onTick, filter);
+
+		
 		if(getIntent().hasExtra("set")) {
 			Log.d(TAG,"Create From Widget");
 			widget = true;
@@ -301,8 +302,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         	case STOPPED:
                 mNM.cancelAll();
         		enterState(STOPPED);
-        		if(widget)
-        			showPicker();
+        		if(widget) {
+        			showNumberPicker();
+        			return;
+        		}
         		break;
         	
         	case PAUSED:
@@ -329,10 +332,14 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		if(resultCode == Activity.RESULT_OK) {
 			int[] values = data.getIntArrayExtra("times");
 			onNumbersPicked(values);
+			if(widget) {
+				finish();
+			}
+			widget = false;
 		}
 	}
 
-    private void showPicker() {
+    private void showNumberPicker() {
 		Intent i = new Intent(this, NNumberPickerDialog.class);
 		i.putExtra("times", lastTimes);
     	startActivityForResult(i, 1);
@@ -438,7 +445,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	        editor.putInt("State", state);
 	        editor.commit();
 			
-			setButtonAlpha(255);
 			if(LOG) Log.v(TAG,"Set current state = " + mCurrentState);
 			
 			switch(state)
@@ -459,6 +465,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 					mCancelButton.setVisibility(View.GONE);
 					mSetButton.setVisibility(View.VISIBLE);	
 					clearTime();
+					setButtonAlpha(255);
 				
 				}break;
 		
@@ -468,6 +475,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 					mPauseButton.setVisibility(View.VISIBLE);
 					mCancelButton.setVisibility(View.VISIBLE);
 					mPauseButton.setImageBitmap(mPlayBitmap);
+					setButtonAlpha(255);
 				}break;	
 			}
 			mCurrentState = state;		
@@ -529,13 +537,14 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		// Start external service
 		if(service){
 		    if(LOG) Log.v(TAG,"Starting the timer service ...");
-		    Intent intent = new Intent( getApplicationContext(), TimerReceiver.class);
+		    Intent intent = new Intent( this, TimerReceiver.class);
 		    intent.putExtra("SetTime",mLastTime);
-		    mPendingIntent = PendingIntent.getBroadcast( getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		    mPendingIntent = PendingIntent.getBroadcast( this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		    mAlarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + time, mPendingIntent);	    
 		}
 
-		// start widget checking
+		// start broadcasting ticks
+	    if(LOG) Log.v(TAG,"Start ticking...");
 
 		final Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(System.currentTimeMillis());
@@ -617,7 +626,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		switch(v.getId()){
 			case R.id.setButton:
 				Log.i("Timer","set button clicked");
-				showPicker();
+				showNumberPicker();
 				break;
 
 			case R.id.prefButton:
@@ -647,16 +656,15 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 				// that are not running (e.g. if we're paused)
 				switch(mCurrentState){
 					case RUNNING:
+						cancelNotification();
 						timerStop();
 						break;
 					case PAUSED:
+						mNM.cancelAll();
 						clearTime();
 						enterState(STOPPED);
 						break;
 				}	
-				mNM.cancelAll();
-			    Intent intent = new Intent( getApplicationContext(), TimerReceiver.class);
-			    mPendingIntent = PendingIntent.getBroadcast( getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
 			    break;
 		}
@@ -676,13 +684,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	
 	private void cancelNotification() {
 		// Create intent for cancelling the notification
-        Context appContext = getApplicationContext();
-        Intent intent = new Intent(appContext, TimerReceiver.class);
+        Intent intent = new Intent(this, TimerReceiver.class);
         intent.setAction(TimerReceiver.CANCEL_NOTIFICATION);
 
         // Cancel the pending cancellation and create a new one
         PendingIntent pendingCancelIntent =
-            PendingIntent.getBroadcast(appContext, 0, intent,
+            PendingIntent.getBroadcast(this, 0, intent,
                                        PendingIntent.FLAG_CANCEL_CURRENT);
         AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             alarmMgr.set(AlarmManager.ELAPSED_REALTIME,
@@ -698,12 +705,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			if(mTime <= TIMER_TIC){
 				
 				Log.e(TAG,"Time up");
-				if(mCurrentState == RUNNING) {
-					CharSequence text = getResources().getText(R.string.Notification);
-					Toast.makeText(context, text,Toast.LENGTH_SHORT).show();
-				}
-				else 
-					Log.e(TAG,"Last Tick");
 				
 				timerStop();
 				
