@@ -330,14 +330,15 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     }
 
 	protected void  onActivityResult (int requestCode, int resultCode, Intent  data) {
+		if(LOG) Log.v(TAG,"Got result");
 		if(resultCode == Activity.RESULT_OK) {
 			int[] values = data.getIntArrayExtra("times");
 			onNumbersPicked(values);
 			if(widget) {
 				finish();
 			}
-			widget = false;
 		}
+		widget = false;
 	}
 
     private void showNumberPicker() {
@@ -510,7 +511,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			if(mWakeLock != null) Log.e(TAG,"There's already a wakelock... Shouldn't be there!");
 			
 			mWakeLock= pm.newWakeLock(
-				PowerManager.SCREEN_DIM_WAKE_LOCK
+				PowerManager.FULL_WAKE_LOCK
 	            | PowerManager.ON_AFTER_RELEASE,
 	            TAG);
 			mWakeLock.acquire();
