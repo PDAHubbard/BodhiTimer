@@ -293,6 +293,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     	    		mTime = (int) (then.getTime() - now.getTime());
 
             		mCurrentState = RUNNING;
+            		aquireWakeLock();
             	// All finished
             	}else{
             		timerStop();
@@ -492,7 +493,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private void releaseWakeLock(){
 		// Remove the wakelock
 		if(mWakeLock != null && mWakeLock.isHeld()) {
-			if(LOG) Log.v(TAG,"Releasing wake lock...");
+			if(LOG) Log.v(TAG,"Releasing wakelock...");
 			mWakeLock.release();
 			mWakeLock = null;
 		}
