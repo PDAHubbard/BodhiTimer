@@ -139,6 +139,11 @@ public class TimerPrefActivity extends PreferenceActivity
 						return false;
 					Log.v(TAG,"Playing Uri: "+notificationUri);
                     player.reset();
+    	        	int currVolume = settings.getInt("tone_volume", 0);
+    	        	if(currVolume != 0) {
+    		        	float log1=(float)(Math.log(100-currVolume)/Math.log(100));
+    		            player.setVolume(1-log1,1-log1);
+    	        	}
                     player.setDataSource(context, Uri.parse(notificationUri));
                     player.prepare();
 	                player.setLooping(false);

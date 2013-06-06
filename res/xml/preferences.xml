@@ -13,7 +13,13 @@
 		<Preference
                 android:title="@string/play_sound"
                 android:summary="@string/play_sound_desc"
-                android:key="playSound" />				
+                android:key="playSound" />
+		<org.yuttadhammo.BodhiTimer.VolumePreference
+			android:key="tone_volume"
+			android:title="@string/volume"
+			android:summary="@string/volume_desc"
+			android:max="100"
+			/>			
         <CheckBoxPreference
                 android:key="Vibrate"
                 android:title="@string/notification_vibrate"

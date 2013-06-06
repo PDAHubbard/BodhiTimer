@@ -31,7 +31,10 @@
 
 	<string name="playing_sound">Stop Sound</string>
 	<string name="playing_sound_desc">Click to stop the current playing sound.</string>
-		
+
+	<string name="volume">Sound Volume</string>
+	<string name="volume_desc">as percent of media volume setting</string>
+			
 		
 	<string name="notification_vibrate">Enable Vibration</string>
 	<string name="notification_vibrate_desc">Cause the timer to trigger vibration.</string>

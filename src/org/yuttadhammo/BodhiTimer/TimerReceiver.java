@@ -145,7 +145,12 @@ public class TimerReceiver extends BroadcastReceiver {
       		mBuilder.setSound(null);
 			
 	        try {
-				player.setDataSource(context, uri);
+	        	int currVolume = settings.getInt("tone_volume", 0);
+	        	if(currVolume != 0) {
+		        	float log1=(float)(Math.log(100-currVolume)/Math.log(100));
+		            player.setVolume(1-log1,1-log1);
+	        	}
+	            player.setDataSource(context, uri);
 		        player.prepare();
 		        player.setLooping(false);
 		        player.setOnCompletionListener(new OnCompletionListener(){
