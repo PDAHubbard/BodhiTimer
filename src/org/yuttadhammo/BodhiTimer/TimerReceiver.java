@@ -62,12 +62,13 @@ public class TimerReceiver extends BroadcastReceiver {
         player = new MediaPlayer();
 
         int setTime = pintent.getIntExtra("SetTime",0);
-		String setTimeStr = TimerUtils.time2humanStr(setTime);
+		String setTimeStr = TimerUtils.time2humanStr(context, setTime);
+		Log.v(TAG,"Time: "+setTime);
 		
 		CharSequence text = context.getText(R.string.Notification);
-		CharSequence textLatest = context.getText(R.string.timer_for) + setTimeStr;
+		CharSequence textLatest = String.format(context.getString(R.string.timer_for_x),setTimeStr);
 
-		// Load the settings
+		// Load the settings 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         boolean led = settings.getBoolean("LED",true);
         boolean vibrate = settings.getBoolean("Vibrate",true);
@@ -133,7 +134,7 @@ public class TimerReceiver extends BroadcastReceiver {
 
         // Cancel the pending cancellation and create a new one
         PendingIntent pendingCancelIntent =
-            PendingIntent.getBroadcast(appContext, 2, intent,
+            PendingIntent.getBroadcast(appContext, 0, intent,
                                        PendingIntent.FLAG_CANCEL_CURRENT);
 
         

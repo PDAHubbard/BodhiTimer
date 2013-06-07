@@ -31,6 +31,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 // import android.net.Uri;
@@ -45,6 +46,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -109,7 +111,11 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 	private TimerActivity context;
 
-	private PendingIntent pi;
+	private PendingIntent tickIntent;
+
+	private int animationIndex;
+
+	private ImageView blackView;
 
 	public static final String BROADCAST = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
 	
@@ -129,6 +135,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         if(Integer.parseInt(android.os.Build.VERSION.SDK) >= 11) {
         	this.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
         }
+
+        tickIntent = PendingIntent.getBroadcast(this, 1,
+				new Intent("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE"), PendingIntent.FLAG_UPDATE_CURRENT);
 
         mCancelButton = (ImageButton)findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(this);
@@ -152,6 +161,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 		mTimerAnimation = (TimerAnimation)findViewById(R.id.mainImage);
 		mTimerAnimation.setOnClickListener(this);
+		
+		blackView = (ImageView)findViewById(R.id.black);
 		
         // Store some useful values
         mSettings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -255,9 +266,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		if(mSettings.getBoolean("FULLSCREEN", false))
 				getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
 		
-    	if(mCurrentState == STOPPED)
-    		cancelNotification();
-    	
     	if(Integer.parseInt(android.os.Build.VERSION.SDK) >= 11) {
 	    	View rootView = getWindow().getDecorView();
 	    	rootView.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
@@ -275,8 +283,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		
         Log.d(TAG,"Last Time: "+mLastTime);
        
-        mTimerAnimation.setIndex(mSettings.getInt("DrawingIndex",0));
+        animationIndex = mSettings.getInt("DrawingIndex",0);
+        
+        mTimerAnimation.setIndex(animationIndex);
         int state = mSettings.getInt("State",0);
+    	if(state == STOPPED)
+    		cancelNotification();
         
         switch(state)
         {
@@ -292,7 +304,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     	        	Log.i(TAG,"Still have a timer");
     	    		mTime = (int) (then.getTime() - now.getTime());
 
-            		mCurrentState = RUNNING;
+            		mCurrentState = RUNNING;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
             		aquireWakeLock();
             	// All finished
             	}else{
@@ -355,7 +367,20 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		if(mCurrentState == STOPPED)
 			mTime = 0;
     	updateLabel(mTime);
-    	mTimerAnimation.updateImage(mTime,mLastTime);  	
+    	if(animationIndex != 0) {
+    		blackView.setVisibility(View.GONE);
+    		mTimerAnimation.updateImage(mTime,mLastTime);
+    	}
+    	else {
+    		float p = (mLastTime != 0) ? (mTime/(float)mLastTime) : 0;
+    		int alpha = (int)(255*p);
+    		String alphas = Integer.toHexString(alpha);
+    		alphas = alphas.length() == 1?"0"+alphas:alphas;
+    		
+    		int color = Color.parseColor("#"+alphas+"000000");
+    		blackView.setBackgroundColor(color);
+    		blackView.setVisibility(View.VISIBLE);
+    	}
     }
 	
 	
@@ -500,7 +525,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		}
 	}
 	/**
-	 * Only aquires the wake lock _if_ it is set in the settings. 
+	 * Only acquires the wake lock _if_ it is set in the settings. 
 	 */
 	private void aquireWakeLock(){
 		// We're going to start a wakelock
@@ -552,10 +577,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		c.setTimeInMillis(System.currentTimeMillis());
 		c.set(Calendar.MILLISECOND, 0);
 		c.add(Calendar.SECOND,1);
-		
-		pi = PendingIntent.getBroadcast(this, 1,
-				new Intent("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE"), PendingIntent.FLAG_UPDATE_CURRENT);
-		mAlarmMgr.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 100, pi);
+		mAlarmMgr.cancel(tickIntent);
+		mAlarmMgr.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 100, tickIntent);
 
 		aquireWakeLock();
 	}
@@ -613,7 +636,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private void stopAlarmTimer(){
 		if(LOG) Log.v(TAG,"Stopping the alarm timer ...");		
 		mAlarmMgr.cancel(mPendingIntent);
-		mAlarmMgr.cancel(pi);
+		mAlarmMgr.cancel(tickIntent);
 		mNM.cancelAll();
 	}
 

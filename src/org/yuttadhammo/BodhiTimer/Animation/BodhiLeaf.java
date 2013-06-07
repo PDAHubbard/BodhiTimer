@@ -95,7 +95,7 @@ class BodhiLeaf implements TimerAnimation.TimerDrawing
 		
 		RectF fill = new RectF(0,0,canvas.getWidth(),canvas.getHeight());
 		mProgressPaint.setAlpha((int)(255-(255*p)));
-		canvas.drawRect(fill,mProgressPaint);	
+		//canvas.drawRect(fill,mProgressPaint);	
 		
 
 		canvas.restore();

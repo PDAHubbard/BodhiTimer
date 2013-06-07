@@ -203,7 +203,7 @@ class CircleAnimation implements TimerAnimation.TimerDrawing
 		canvas.save();
 
 		float p = (max == 0) ? 0 : (time/(float)max);
-		int [] timeVec = TimerUtils.time2Mhs(time);
+		int [] timeVec = TimerUtils.time2Array(time);
 		if(mLastTime == null) mLastTime = timeVec;
 		if(mLastTime[2] != timeVec[2]) mMsFlipper = !mMsFlipper;
 		

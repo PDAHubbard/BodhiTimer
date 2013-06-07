@@ -6,14 +6,21 @@
 	android:id="@+id/mainLayout"
 	android:layout_height="match_parent">
 
-    	<org.yuttadhammo.BodhiTimer.Animation.TimerAnimation
+   	<org.yuttadhammo.BodhiTimer.Animation.TimerAnimation
 		android:id="@+id/mainImage"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:gravity="center"
 		android:adjustViewBounds="true"
 		android:scaleType="centerInside"
-	/>
+		/>
+   	<ImageView 
+		android:id="@+id/black"
+	    android:layout_width="match_parent" 
+	    android:layout_height="match_parent"
+	    android:visibility="gone"
+	    android:background="#FF000000"
+   	    />
     
     
    	<TextView 

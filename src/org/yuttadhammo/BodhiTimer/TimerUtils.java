@@ -1,5 +1,7 @@
 package org.yuttadhammo.BodhiTimer;
 
+import android.content.Context;
+
 public class TimerUtils {
 	
 
@@ -28,7 +30,7 @@ public class TimerUtils {
 	 */
 	public static String[] time2str(int ms)
 	{	
-		int [] time = time2Mhs(ms);
+		int [] time = time2Array(ms);
  
 		if(time[0] == 0 && time[1] == 0 && time[2] == 0){
 			return new String[] {};
@@ -48,7 +50,7 @@ public class TimerUtils {
 	 *  @param ms the time in milliseconds
 	 *  @return [hour,minutes,seconds,ms]
 	 */
-	public static int [] time2Mhs(int time)
+	public static int [] time2Array(int time)
 	{
 		int ms = time % 1000;
 		int seconds = (int) (time / 1000);
@@ -66,23 +68,37 @@ public class TimerUtils {
 		return timeVec;
 	}
  
-	public static String time2humanStr(int time)
+	public static String time2humanStr(Context context, int time)
 	{
-		int [] timeVec = time2Mhs(time);
-		int hour = timeVec[0], minutes=timeVec[1];
+		int [] timeVec = time2Array(time);
+		int hour = timeVec[0], minutes=timeVec[1], seconds=timeVec[2];
  
-   		String r = new String();
+   		String r = "";
    		
    		// Ugly string formating
    		if(hour != 0){	
-   			r += hour + " hour";					
-   			if(hour == 1) r+= "s";
-   			r+= " and ";
+   			if(hour == 1)
+   				r += String.format(context.getString(R.string.x_hours), hour);
+   			else
+   				r += context.getString(R.string.one_hour);
+   		}
+   		if (minutes != 0) {
+	   		if(r.length() != 0)
+	   			r+= ",";
+   			if(minutes == 1)
+   				r += String.format(context.getString(R.string.x_mins), minutes);
+   			else
+   				r += context.getString(R.string.one_min);
+   		}
+   		if (seconds != 0) {
+	   		if(r.length() != 0)
+	   			r+= ",";
+   			if(seconds == 1)
+   				r += String.format(context.getString(R.string.x_secs), seconds);
+   			else
+   				r += context.getString(R.string.one_sec);
    		}
    		
-   		r += minutes + " min";
-   		if(minutes != 1) r+= "s";
- 
    		return r;
 	}
 }
