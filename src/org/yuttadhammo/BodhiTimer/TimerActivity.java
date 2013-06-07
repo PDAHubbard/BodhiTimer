@@ -93,7 +93,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 	private AlarmManager mAlarmMgr;
 
-	private PendingIntent mPendingIntent;
+	private static PendingIntent mPendingIntent;
 
 	private AudioManager mAudioMgr;
 
@@ -111,7 +111,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 	private TimerActivity context;
 
-	private PendingIntent tickIntent;
+	private static PendingIntent tickIntent;
 
 	private int animationIndex;
 
@@ -174,10 +174,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         
         lastTimes = new int[3];
         
-        lastTimes[0] = mSettings.getInt("last_hour", 0);
-        lastTimes[1] = mSettings.getInt("last_min", 0);
-        lastTimes[2] = mSettings.getInt("last_sec", 0);
- 
         //enterState(STOPPED);
         
 		mSettings.registerOnSharedPreferenceChangeListener(this);
@@ -238,6 +234,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     	super.onResume();
 		Log.d(TAG,"Resuming");
 
+        lastTimes[0] = mSettings.getInt("last_hour", 0);
+        lastTimes[1] = mSettings.getInt("last_min", 0);
+        lastTimes[2] = mSettings.getInt("last_sec", 0);
+		
 		// register receiver to update the GUI
 		IntentFilter filter=new IntentFilter(BROADCAST);
 		filter.setPriority(2);
@@ -435,6 +435,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		
 		Editor mSettingsEdit = mSettings.edit();
 		mSettingsEdit.putInt("LastTime", mLastTime);
+		mSettingsEdit.putInt("last_hour", lastTimes[0]);
+		mSettingsEdit.putInt("last_min", lastTimes[1]);
+		mSettingsEdit.putInt("last_sec", lastTimes[2]);
 		mSettingsEdit.commit();
 		
 		// Check to make sure the phone isn't set to silent
