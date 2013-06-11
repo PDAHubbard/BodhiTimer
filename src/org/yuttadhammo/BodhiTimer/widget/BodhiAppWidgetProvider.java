@@ -33,7 +33,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 
     private static int state;
 
-	private static Bitmap bmp;
+	private static Bitmap bmp = null;
     
     public void onUpdate(Context context, final AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 
@@ -52,6 +52,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	public void onEnabled(Context context) {
 		super.onEnabled(context);
     	Log.i("Timer Widget","enabled");
+
     	startTicking(context);
 	
 	}
@@ -77,7 +78,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		super.onReceive(context, intent);
-	
+
 		final String action = intent.getAction();
 	
 		if (ACTION_CLOCK_UPDATE.equals(action) || ACTION_CLOCK_CANCEL.equals(action)){
@@ -131,14 +132,12 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         // the layout from our package).
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.appwidget);
 
-        mSettings = PreferenceManager.getDefaultSharedPreferences(context);
-
+		mSettings = PreferenceManager.getDefaultSharedPreferences(context);
+       
 		// set image
-		
-       	int di = mSettings.getInt("DrawingIndex",0);
-       	
-       	if(di >= 0) {
-    		if(!mSettings.getBoolean("custom_bmp", false) || mSettings.getString("bmp_url","").length() == 0) {
+		       	
+       	if(bmp == null) {
+        	if(!mSettings.getBoolean("custom_bmp", false) || mSettings.getString("bmp_url","").length() == 0) {
     			Resources resources = context.getResources();
     			bmp = BitmapFactory.decodeResource(resources, R.drawable.leaf);
     		}
@@ -146,12 +145,12 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     			String bmpUrl = mSettings.getString("bmp_url", "");
     			Uri selectedImage = Uri.parse(bmpUrl);
                 InputStream imageStream = null;
-				try {
-					imageStream = context.getContentResolver().openInputStream(selectedImage);
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+    			try {
+    				imageStream = context.getContentResolver().openInputStream(selectedImage);
+    			} catch (FileNotFoundException e) {
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    			}
                 bmp = BitmapFactory.decodeStream(imageStream);
     		}
        	}
@@ -170,18 +169,18 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         state = mSettings.getInt("State",0);
         //Log.d("Timer Widget", "state=" + state);
     	
-        // We still have a timer running!
+		float p = (mLastTime != 0) ? (delta/(float)mLastTime) : 0;
+
+		// We still have a timer running!
 		if(then.after(now) && state == TimerActivity.RUNNING){
     		
-			float p = (mLastTime != 0) ? (delta/(float)mLastTime) : 0;
-			bmp = adjustOpacity(bmp,(int)(255-(255*p)));
 	   		views.setTextViewText(R.id.time, getTime(delta));
     	}
 		else if(state == TimerActivity.PAUSED){
 
-			Integer currentTime = mSettings.getInt("CurrentTime",0);
-			currentTime += 999;  // round seconds upwards
-            views.setTextViewText(R.id.time, TimerUtils.time2hms(currentTime));
+			Integer time = mSettings.getInt("CurrentTime",0);
+	        time = Math.round(time/1000)*1000;  // round to seconds
+            views.setTextViewText(R.id.time, TimerUtils.time2hms(time));
     		final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     		alarmManager.cancel(createUpdate(context));
 		}
@@ -192,7 +191,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     		alarmManager.cancel(createUpdate(context));
     	}
     	
-    	views.setImageViewBitmap(R.id.mainImage, bmp);
+    	views.setImageViewBitmap(R.id.mainImage, then.after(now) && state == TimerActivity.RUNNING?adjustOpacity(bmp,(int)(255-(255*p))):bmp);
 		
         // Get the layout for the App Widget and attach an on-click listener
         // to the button

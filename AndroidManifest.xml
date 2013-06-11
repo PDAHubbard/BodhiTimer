@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="org.yuttadhammo.BodhiTimer"
-      android:versionName="2.7.5" android:versionCode="31">
+      android:versionName="2.7.6" android:versionCode="32">
     
 	<uses-sdk android:minSdkVersion="5" android:targetSdkVersion="17" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -56,7 +56,4 @@
 		<receiver android:name=".TimerReceiver" ></receiver>
     	<service android:name="org.yuttadhammo.BodhiTimer.NoticeService" />
 	</application>
-
-
-
 </manifest> 

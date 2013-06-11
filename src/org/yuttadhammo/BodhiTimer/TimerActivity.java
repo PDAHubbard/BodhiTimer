@@ -72,7 +72,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private final String TAG = getClass().getSimpleName();
 	
 	/** Update rate of the internal timer */
-	private final int TIMER_TIC = 100;
+	private final int TIMER_TIC = 1000;
 	
 	/** The timer's current state */
 	public int mCurrentState = -1;
@@ -135,7 +135,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         }
 
         tickIntent = PendingIntent.getBroadcast(this, 1,
-				new Intent("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE"), PendingIntent.FLAG_UPDATE_CURRENT);
+				new Intent(BROADCAST), PendingIntent.FLAG_UPDATE_CURRENT);
 
         mCancelButton = (ImageButton)findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(this);
@@ -208,7 +208,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         	case RUNNING:
         	{
 	        	Log.i(TAG,"pause while running: "+new Date().getTime() + mTime);
-        		//editor.putLong("TimeStamp", new Date().getTime() + mTime);
         		
         	}break;
         	
@@ -391,7 +390,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		if(time == 0)
 			time = mLastTime;
 		
-        time += 999;  // round seconds upwards
+        time = Math.round(time/1000)*1000;  // round to seconds
         mTimerLabel.setText(TimerUtils.time2hms(time));
 
 		//mTimerLabel2.setText(str[1]);
@@ -545,7 +544,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		c.set(Calendar.MILLISECOND, 0);
 		c.add(Calendar.SECOND,1);
 		mAlarmMgr.cancel(tickIntent);
-		mAlarmMgr.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 100, tickIntent);
+		mAlarmMgr.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), TIMER_TIC, tickIntent);
 
 	}
 
@@ -696,9 +695,15 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	
 	private BroadcastReceiver onTick = new BroadcastReceiver() {
 		public void onReceive(Context ctxt, Intent i) {
-			mTime -= TIMER_TIC;
+
+			long timeStamp = mSettings.getLong("TimeStamp", -1);
+	        
+			Date now = new Date();
+			Date then = new Date(timeStamp);
+
+			mTime = (int)(then.getTime() - now.getTime());	
 			
-			if(mTime <= TIMER_TIC){
+			if(mTime <= 0){
 				
 				Log.e(TAG,"Time up");
 				
