@@ -106,4 +106,17 @@ public class TimerUtils {
    		
    		return r;
 	}
+
+
+	public static String time2hms(int time) {
+		String[] str = time2str(time);
+		if(str.length == 3)
+			return(str[0]+":"+str[1]+":"+str[2]);
+		else if(str.length == 2)
+			return(str[0]+":"+str[1]);
+		else if(str.length == 1)
+			return(str[0]);
+		else
+			return("");
+	}
 }

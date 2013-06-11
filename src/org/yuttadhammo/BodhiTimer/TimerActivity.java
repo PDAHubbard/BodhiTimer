@@ -61,7 +61,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 	public static final int STOPPED=1;
 
-	private static final int PAUSED=2;
+	public static final int PAUSED=2;
 	
 	/** Should the logs be shown */
 	private final static boolean LOG = true;
@@ -392,15 +392,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			time = mLastTime;
 		
         time += 999;  // round seconds upwards
-		String[] str = TimerUtils.time2str(time);
-		if(str.length == 3)
-			mTimerLabel.setText(str[0]+":"+str[1]+":"+str[2]);
-		else if(str.length == 2)
-			mTimerLabel.setText(str[0]+":"+str[1]);
-		else if(str.length == 1)
-			mTimerLabel.setText(str[0]);
-		else
-			mTimerLabel.setText("");
+        mTimerLabel.setText(TimerUtils.time2hms(time));
 
 		//mTimerLabel2.setText(str[1]);
 	}
@@ -564,6 +556,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private void timerStop()
 	{		
 		if(LOG) Log.v(TAG,"Timer stopped");
+		
 		mAlarmMgr.cancel(tickIntent);
 		clearTime();
 		
@@ -586,7 +579,11 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	{
 		if(LOG) Log.v(TAG,"Pausing the timer...");
 
-		
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putInt("CurrentTime",mTime);
+        editor.commit();
+        
+		mAlarmMgr.cancel(tickIntent);
 		stopAlarmTimer();
 		
 		enterState(PAUSED);

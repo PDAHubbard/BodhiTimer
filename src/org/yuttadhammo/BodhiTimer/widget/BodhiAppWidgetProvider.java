@@ -177,7 +177,15 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 			bmp = adjustOpacity(bmp,(int)(255-(255*p)));
 	   		views.setTextViewText(R.id.time, getTime(delta));
     	}
-		else{
+		else if(state == TimerActivity.PAUSED){
+
+			Integer currentTime = mSettings.getInt("CurrentTime",0);
+			currentTime += 999;  // round seconds upwards
+            views.setTextViewText(R.id.time, TimerUtils.time2hms(currentTime));
+    		final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    		alarmManager.cancel(createUpdate(context));
+		}
+		else {
             views.setTextViewText(R.id.time, "");
     		final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     		
