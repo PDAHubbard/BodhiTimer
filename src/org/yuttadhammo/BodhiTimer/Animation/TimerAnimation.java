@@ -97,6 +97,7 @@ public class TimerAnimation extends ImageView implements OnClickListener, OnShar
 
 	@Override
 	public void onDraw(Canvas canvas){
+		if(mIndex < 0 || mIndex >= mDrawings.size()) mIndex = 0;
 		mDrawings.get(mIndex).updateImage(canvas, mLastTime, mLastMax);
 	}
 	

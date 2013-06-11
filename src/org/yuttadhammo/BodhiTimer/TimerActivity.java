@@ -98,8 +98,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private AudioManager mAudioMgr;
 
 	private SharedPreferences mSettings;
-
-	private WakeLock mWakeLock;
     
 	// for canceling notifications
 	
@@ -175,6 +173,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         lastTimes = new int[3];
         
         //enterState(STOPPED);
+
+		if(mSettings.getBoolean("WakeLock", false))
+			getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
         
 		mSettings.registerOnSharedPreferenceChangeListener(this);
     }
@@ -221,7 +222,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         
         editor.commit();
 
-        releaseWakeLock();
         unregisterReceiver(onTick);
     }
    
@@ -305,7 +305,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     	    		mTime = (int) (then.getTime() - now.getTime());
 
             		mCurrentState = RUNNING;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-            		aquireWakeLock();
             	// All finished
             	}else{
             		timerStop();
@@ -519,33 +518,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		mPrefButton.setAlpha(i);		
 	}
 	
-	private void releaseWakeLock(){
-		// Remove the wakelock
-		if(mWakeLock != null && mWakeLock.isHeld()) {
-			if(LOG) Log.v(TAG,"Releasing wakelock...");
-			mWakeLock.release();
-			mWakeLock = null;
-		}
-	}
-	/**
-	 * Only acquires the wake lock _if_ it is set in the settings. 
-	 */
-	private void aquireWakeLock(){
-		// We're going to start a wakelock
-		if(mSettings.getBoolean("WakeLock", false)){
-			if(LOG) Log.v(TAG,"Issuing a wakelock...");
-			
-			PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
-			if(mWakeLock != null) Log.e(TAG,"There's already a wakelock... Shouldn't be there!");
-			
-			mWakeLock= pm.newWakeLock(
-				PowerManager.FULL_WAKE_LOCK
-	            | PowerManager.ON_AFTER_RELEASE,
-	            TAG);
-			mWakeLock.acquire();
-		}		
-	}
-	
 	/**
 	 * Starts the timer at the given time
 	 * @param time with which to count down
@@ -566,7 +538,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		
 		// Start external service
 		if(service){
-		    if(LOG) Log.v(TAG,"Starting the timer service ...");
+		    if(LOG) Log.v(TAG,"Starting the timer service: "+ TimerUtils.time2humanStr(context, mLastTime));
 		    Intent intent = new Intent( this, TimerReceiver.class);
 		    intent.putExtra("SetTime",mLastTime);
 		    mPendingIntent = PendingIntent.getBroadcast( this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -583,7 +555,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		mAlarmMgr.cancel(tickIntent);
 		mAlarmMgr.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 100, tickIntent);
 
-		aquireWakeLock();
 	}
 
 	
@@ -593,13 +564,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private void timerStop()
 	{		
 		if(LOG) Log.v(TAG,"Timer stopped");
-		stopAlarmTimer();
+		mAlarmMgr.cancel(tickIntent);
 		clearTime();
 		
 		// Stop our timer service
 		enterState(STOPPED);		
 		
-		releaseWakeLock(); 
 	}
 	
 	/** Resume the time after being paused */
@@ -639,7 +609,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private void stopAlarmTimer(){
 		if(LOG) Log.v(TAG,"Stopping the alarm timer ...");		
 		mAlarmMgr.cancel(mPendingIntent);
-		mAlarmMgr.cancel(tickIntent);
 		mNM.cancelAll();
 	}
 
@@ -680,6 +649,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			
 			case R.id.cancelButton:
 				
+				stopAlarmTimer();
 				// We need to be careful to not cancel timers
 				// that are not running (e.g. if we're paused)
 				switch(mCurrentState){
@@ -688,7 +658,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 						timerStop();
 						break;
 					case PAUSED:
-						mNM.cancelAll();
 						clearTime();
 						enterState(STOPPED);
 						break;
@@ -705,8 +674,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		
 		// We need to check if the 
 		if(key == "WakeLock"){
-			if(mSettings.getBoolean("WakeLock", false)) aquireWakeLock();
-			else releaseWakeLock();
+			if(mSettings.getBoolean("WakeLock", false))
+				getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
+			else
+				getWindow().clearFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 		}
 	}
 	

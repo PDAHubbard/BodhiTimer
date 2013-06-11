@@ -205,7 +205,7 @@ public class TimerReceiver extends BroadcastReceiver {
     		    Log.v(TAG,"Restarting the timer service ...");
     		    Intent rintent = new Intent( context, TimerReceiver.class);
     		    rintent.putExtra("SetTime",time);
-    		    PendingIntent mPendingIntent = PendingIntent.getBroadcast( context, 0, rintent, PendingIntent.FLAG_CANCEL_CURRENT);
+    		    PendingIntent mPendingIntent = PendingIntent.getBroadcast( context, 0, rintent, PendingIntent.FLAG_UPDATE_CURRENT);
                 AlarmManager mAlarmMgr = (AlarmManager)context
                         .getSystemService(Context.ALARM_SERVICE);
                 mAlarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + time, mPendingIntent);

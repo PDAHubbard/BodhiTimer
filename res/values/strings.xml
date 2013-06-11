@@ -11,13 +11,13 @@
 	<string name="warning_title">Warning</string>
 	<string name="warning_button">OK</string>
 	
-	<string name="timer_for_x">"Timer for%s"</string>
-	<string name="x_hours">" %d hours"</string>
-	<string name="one_hour">" 1 hour"</string>
-	<string name="x_mins">" %d minutes"</string>
-	<string name="one_min">" 1 hour"</string>
-	<string name="x_secs">" %d seconds"</string>
-	<string name="one_sec">" 1 second"</string>
+	<string name="timer_for_x">Timer for%s</string>
+	<string name="x_hours">" %d hours</string>
+	<string name="one_hour"> 1 hour</string>
+	<string name="x_mins">" %d minutes</string>
+	<string name="one_min"> 1 minute</string>
+	<string name="x_secs"> %d seconds</string>
+	<string name="one_sec"> 1 second</string>
 			
 	<string name="prefs">Preferences</string>
 

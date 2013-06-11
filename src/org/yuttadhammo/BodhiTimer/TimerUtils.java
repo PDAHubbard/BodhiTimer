@@ -1,9 +1,12 @@
 package org.yuttadhammo.BodhiTimer;
 
 import android.content.Context;
+import android.util.Log;
 
 public class TimerUtils {
 	
+
+	private static String TAG = "TimerUtils";
 
 	/**
 	 * Returns the suggested text size for the string. A hack.
@@ -72,12 +75,14 @@ public class TimerUtils {
 	{
 		int [] timeVec = time2Array(time);
 		int hour = timeVec[0], minutes=timeVec[1], seconds=timeVec[2];
- 
-   		String r = "";
+		
+		//Log.v(TAG,"Times: "+hour+" "+minutes+" "+seconds);
    		
-   		// Ugly string formating
+		String r = "";
+   		
+   		// string formating
    		if(hour != 0){	
-   			if(hour == 1)
+   			if(hour != 1)
    				r += String.format(context.getString(R.string.x_hours), hour);
    			else
    				r += context.getString(R.string.one_hour);
@@ -85,7 +90,7 @@ public class TimerUtils {
    		if (minutes != 0) {
 	   		if(r.length() != 0)
 	   			r+= ",";
-   			if(minutes == 1)
+   			if(minutes != 1)
    				r += String.format(context.getString(R.string.x_mins), minutes);
    			else
    				r += context.getString(R.string.one_min);
@@ -93,7 +98,7 @@ public class TimerUtils {
    		if (seconds != 0) {
 	   		if(r.length() != 0)
 	   			r+= ",";
-   			if(seconds == 1)
+   			if(seconds != 1)
    				r += String.format(context.getString(R.string.x_secs), seconds);
    			else
    				r += context.getString(R.string.one_sec);
