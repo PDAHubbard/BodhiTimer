@@ -120,6 +120,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private ImageView blackView;
 
 	private MediaPlayer prePlayer;
+
+	private long timeStamp;
 	
 	public static final String BROADCAST = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
 	
@@ -299,7 +301,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         {
         	case RUNNING:
 	        	Log.i(TAG,"Resume while running: "+mSettings.getLong("TimeStamp", -1));
-        		long timeStamp = mSettings.getLong("TimeStamp", -1);
+        		timeStamp = mSettings.getLong("TimeStamp", -1);
                 
         		Date now = new Date();
         		Date then = new Date(timeStamp);
@@ -529,8 +531,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 		mTime = time;
 		
+		timeStamp = new Date().getTime() + mTime;
+		
         SharedPreferences.Editor editor = mSettings.edit();
-		editor.putLong("TimeStamp", new Date().getTime() + mTime);
+		editor.putLong("TimeStamp", timeStamp);
         editor.commit();
 
 		
@@ -755,8 +759,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private BroadcastReceiver onTick = new BroadcastReceiver() {
 		public void onReceive(Context ctxt, Intent i) {
 
-			long timeStamp = mSettings.getLong("TimeStamp", -1);
-	        
 			Date now = new Date();
 			Date then = new Date(timeStamp);
 
