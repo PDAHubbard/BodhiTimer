@@ -174,7 +174,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 		// We still have a timer running!
 		if(then.after(now) && state == TimerActivity.RUNNING){
     		
-	   		views.setTextViewText(R.id.time, getTime(delta));
+	   		views.setTextViewText(R.id.time, getTime(delta-1000));
     	}
 		else if(state == TimerActivity.PAUSED){
 
