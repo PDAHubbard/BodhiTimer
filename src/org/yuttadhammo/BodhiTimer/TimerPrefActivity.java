@@ -43,10 +43,16 @@ public class TimerPrefActivity extends PreferenceActivity
 	private static Activity activity;
 	private MediaPlayer player;
 	private Preference play;
-	private int SELECT_RINGTONE = 123;
-	private int SELECT_PHOTO = 456;
-	private int SELECT_FILE;
+	private Preference preplay;
+	
+	private final int SELECT_RINGTONE = 0;
+	private final int SELECT_FILE = 1;
+	private final int SELECT_PRE_RINGTONE = 2;
+	private final int SELECT_PRE_FILE = 3;
+	private final int SELECT_PHOTO = 4;
+	
 	private String lastToneType;
+	private String lastPreToneType;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +71,10 @@ public class TimerPrefActivity extends PreferenceActivity
         // Load the sounds
         ListPreference tone = (ListPreference)findPreference("NotificationUri");
         play = (Preference)findPreference("playSound");
-    	
+
+        ListPreference pretone = (ListPreference)findPreference("PreSoundUri");
+        preplay = (Preference)findPreference("playPreSound");
+
     	CharSequence [] entries = {"No Sound","Three Bells","One Bell","Gong","Singing Bowl","System Tone","Sound File"};
     	CharSequence [] entryValues = {"","android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell1,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.gong,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bowl,"system","file"};
     	
@@ -75,10 +84,17 @@ public class TimerPrefActivity extends PreferenceActivity
     	
 		tone.setEntries(entries);
 		tone.setEntryValues(entryValues);
+
+    	if(pretone.getValue() == null) pretone.setValue((String)entryValues[1]);
+    	pretone.setDefaultValue((String)entryValues[0]);
+    	
+    	pretone.setEntries(entries);
+    	pretone.setEntryValues(entryValues);
 		
     	player = new MediaPlayer();
     	
     	lastToneType = settings.getString("NotificationUri", (String)entryValues[1]);
+    	lastPreToneType = settings.getString("NotificationUri", (String)entryValues[1]);
     	
     	tone.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 			
@@ -87,7 +103,10 @@ public class TimerPrefActivity extends PreferenceActivity
     	    	if(player.isPlaying()) {
     				play.setTitle(context.getString(R.string.play_sound));
     				play.setSummary(context.getString(R.string.play_sound_desc));
-    	    		player.stop();      
+    				preplay.setTitle(context.getString(R.string.play_pre_sound));
+    				preplay.setSummary(context.getString(R.string.play_pre_sound_desc));
+
+    				player.stop();      
     	    	}
     	    	if(newValue.toString().equals("system")) {
     	    		Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
@@ -124,8 +143,10 @@ public class TimerPrefActivity extends PreferenceActivity
 			public boolean onPreferenceClick(final Preference preference) {
     			if(player.isPlaying()) {
     				player.stop();
-    				preference.setTitle(context.getString(R.string.play_sound));
-    				preference.setSummary(context.getString(R.string.play_sound_desc));
+    				play.setTitle(context.getString(R.string.play_sound));
+    				play.setSummary(context.getString(R.string.play_sound_desc));
+    				preplay.setTitle(context.getString(R.string.play_pre_sound));
+    				preplay.setSummary(context.getString(R.string.play_pre_sound_desc));
     				return false;
     			}
     			
@@ -145,6 +166,102 @@ public class TimerPrefActivity extends PreferenceActivity
     		            player.setVolume(1-log1,1-log1);
     	        	}
                     player.setDataSource(context, Uri.parse(notificationUri));
+                    player.prepare();
+	                player.setLooping(false);
+	                player.setOnCompletionListener(new OnCompletionListener(){
+						@Override
+						public void onCompletion(MediaPlayer mp) {
+		    				preference.setTitle(context.getString(R.string.play_sound));
+		    				preference.setSummary(context.getString(R.string.play_sound_desc));
+						}
+	                });
+	                player.start();
+					preference.setTitle(context.getString(R.string.playing_sound));
+					preference.setSummary(context.getString(R.string.playing_sound_desc));
+                } catch (IOException e) {
+					// TODO Auto-generated catch block
+                	
+					e.printStackTrace();
+				}
+				
+                return false;
+			}
+
+    	});
+  
+    	// pre play tone
+    	
+       	
+    	pretone.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+    	    	if(player.isPlaying()) {
+    				play.setTitle(context.getString(R.string.play_sound));
+    				play.setSummary(context.getString(R.string.play_sound_desc));
+    				preplay.setTitle(context.getString(R.string.play_pre_sound));
+    				preplay.setSummary(context.getString(R.string.play_pre_sound_desc));
+
+    	    		player.stop();      
+    	    	}
+    	    	if(newValue.toString().equals("system")) {
+    	    		Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+    	    		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL);
+    	    		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Tone");
+    	    		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
+    	    		activity.startActivityForResult(intent, SELECT_PRE_RINGTONE);
+    	    	}
+    	    	else if(newValue.toString().equals("file")) {
+
+    	            Intent intent = new Intent(Intent.ACTION_GET_CONTENT); 
+    	            intent.setType("audio/*"); 
+    	            intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    	            try {
+    	            	activity.startActivityForResult(Intent.createChooser(intent, "Select Sound File"), SELECT_PRE_FILE);
+    	            } 
+    	            catch (ActivityNotFoundException ex) {
+    	                Toast.makeText(activity, "Please install a File Manager.", 
+    	                        Toast.LENGTH_SHORT).show();
+    	            }
+    	        }
+    	    	else
+    	            lastPreToneType = (String) newValue;
+    	    		
+				return true;
+			}
+
+    	});
+
+    	preplay.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+			
+    		@Override
+			public boolean onPreferenceClick(final Preference preference) {
+    			if(player.isPlaying()) {
+    				player.stop();
+    				play.setTitle(context.getString(R.string.play_sound));
+    				play.setSummary(context.getString(R.string.play_sound_desc));
+    				preplay.setTitle(context.getString(R.string.play_pre_sound));
+    				preplay.setSummary(context.getString(R.string.play_pre_sound_desc));
+    				return false;
+    			}
+    			
+                try {
+                    String preSoundUri = settings.getString("PreSoundUri", "android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell);
+					if(preSoundUri.equals("system"))
+						preSoundUri = settings.getString("SystemUri", "");
+					else if(preSoundUri.equals("file"))
+						preSoundUri = settings.getString("FileUri", "");
+					if(preSoundUri.equals(""))
+						return false;
+					Log.v(TAG,"Playing Uri: "+preSoundUri);
+                    player.reset();
+    	        	int currVolume = settings.getInt("tone_volume", 0);
+    	        	if(currVolume != 0) {
+    		        	float log1=(float)(Math.log(100-currVolume)/Math.log(100));
+    		            player.setVolume(1-log1,1-log1);
+    	        	}
+                    player.setDataSource(context, Uri.parse(preSoundUri));
                     player.prepare();
 	                player.setLooping(false);
 	                player.setOnCompletionListener(new OnCompletionListener(){
@@ -297,41 +414,70 @@ public class TimerPrefActivity extends PreferenceActivity
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent intent)
     {
-        Uri uri = null;
-        Editor mSettingsEdit = settings.edit();
-		if (resultCode == Activity.RESULT_OK && requestCode == SELECT_RINGTONE ) {
-        	uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-        	if (uri != null) {
-                Log.i("Timer","Got ringtone "+uri.toString()); 
-        		mSettingsEdit.putString("SystemUri", uri.toString());
-	            lastToneType = "system";
-       	}
-        	else {
-        		mSettingsEdit.putString("SystemUri", "");
-        		mSettingsEdit.putString("NotificationUri",lastToneType);
-        	}
-        }
-        else if (resultCode == Activity.RESULT_OK && requestCode == SELECT_FILE) {
-            // Get the Uri of the selected file 
-            uri = intent.getData();
-        	if (uri != null) {
-                Log.i(TAG, "File Path: " + uri);
-        		mSettingsEdit.putString("FileUri", uri.toString());
-	            lastToneType = "file";
-        	}
-       		else {
-        		mSettingsEdit.putString("FileUri", "");
-        		mSettingsEdit.putString("NotificationUri",lastToneType);
-        	}
-        }
-        else if (resultCode == Activity.RESULT_OK && requestCode == SELECT_PHOTO ){
-            uri = intent.getData();
-        	if (uri != null)
-        		mSettingsEdit.putString("bmp_url", uri.toString());
-        	else
-        		mSettingsEdit.putString("bmp_url", "");
-        }
-		mSettingsEdit.commit();  
+    	if (resultCode == Activity.RESULT_OK) {
+	    	Uri uri = null;
+	        Editor mSettingsEdit = settings.edit();
+	        switch(requestCode) {
+	        	case SELECT_RINGTONE :
+		        	uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+		        	if (uri != null) {
+		                Log.i("Timer","Got ringtone "+uri.toString()); 
+		        		mSettingsEdit.putString("SystemUri", uri.toString());
+			            lastToneType = "system";
+			       	}
+		        	else {
+		        		mSettingsEdit.putString("SystemUri", "");
+		        		mSettingsEdit.putString("NotificationUri",lastToneType);
+		        	}
+	        		break;
+	        	case SELECT_FILE:
+		            // Get the Uri of the selected file 
+		            uri = intent.getData();
+		        	if (uri != null) {
+		                Log.i(TAG, "File Path: " + uri);
+		        		mSettingsEdit.putString("FileUri", uri.toString());
+			            lastToneType = "file";
+		        	}
+		       		else {
+		        		mSettingsEdit.putString("FileUri", "");
+		        		mSettingsEdit.putString("NotificationUri",lastToneType);
+		        	}
+		        	break;
+	        	case SELECT_PRE_RINGTONE :
+		        	uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+		        	if (uri != null) {
+		                Log.i("Timer","Got ringtone "+uri.toString()); 
+		        		mSettingsEdit.putString("PreSystemUri", uri.toString());
+			            lastPreToneType = "system";
+			       	}
+		        	else {
+		        		mSettingsEdit.putString("PreSystemUri", "");
+		        		mSettingsEdit.putString("PreSoundUri",lastPreToneType);
+		        	}
+	        		break;
+	        	case SELECT_PRE_FILE:
+		            // Get the Uri of the selected file 
+		            uri = intent.getData();
+		        	if (uri != null) {
+		                Log.i(TAG, "File Path: " + uri);
+		        		mSettingsEdit.putString("PreFileUri", uri.toString());
+			            lastPreToneType = "file";
+		        	}
+		       		else {
+		        		mSettingsEdit.putString("PreFileUri", "");
+		        		mSettingsEdit.putString("PreSoundUri",lastPreToneType);
+		        	}
+		        	break;		        	
+	        	case SELECT_PHOTO:
+		            uri = intent.getData();
+		        	if (uri != null)
+		        		mSettingsEdit.putString("bmp_url", uri.toString());
+		        	else
+		        		mSettingsEdit.putString("bmp_url", "");
+		        	break;
+	        }
+			mSettingsEdit.commit(); 
+    	}
     }
 
 }

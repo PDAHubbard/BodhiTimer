@@ -15,6 +15,7 @@ import org.yuttadhammo.BodhiTimer.Animation.TimerAnimation;
 import org.yuttadhammo.BodhiTimer.NNumberPickerDialog.OnNNumberPickedListener;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import android.annotation.SuppressLint;
@@ -34,6 +35,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
+import android.net.Uri;
 // import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -115,6 +119,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 	private ImageView blackView;
 
+	private MediaPlayer prePlayer;
+	
 	public static final String BROADCAST = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
 	
 	/** Called when the activity is first created.
@@ -441,6 +447,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			showDialog(ALERT_DIALOG);
 		}
 		
+		playPreSound();
 		timerStart(mLastTime,true);
 		
 		if(widget == true) {
@@ -609,10 +616,58 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	}
 
 	
+	/** plays a sound before timer starts */
+	private void playPreSound() {
+        String uriString = mSettings.getString("PreSoundUri", "");
+		
+        if(uriString.equals(""))
+        	return;
+        
+		if(uriString.equals("system"))
+			uriString = mSettings.getString("SystemUri", "");
+		else if(uriString.equals("file"))
+			uriString = mSettings.getString("FileUri", "");
+
+		Log.v(TAG,"preplay uri: "+uriString);
+
+		try {
+			prePlayer = new MediaPlayer();
+			Uri uri = Uri.parse(uriString);
+
+			int currVolume = mSettings.getInt("tone_volume", 0);
+        	if(currVolume != 0) {
+	        	float log1=(float)(Math.log(100-currVolume)/Math.log(100));
+	            prePlayer.setVolume(1-log1,1-log1);
+        	}
+        	prePlayer.setDataSource(context, uri);
+        	prePlayer.prepare();
+        	prePlayer.setLooping(false);
+        	prePlayer.setOnCompletionListener(new OnCompletionListener(){
+
+				@Override
+				public void onCompletion(MediaPlayer mp) {
+					// TODO Auto-generated method stub
+					mp.release();
+				}
+	        	
+	        });
+        	prePlayer.start();
+        } catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+
 	/** {@inheritDoc} */
 	public void onClick(View v) 
 	{
+
 		if(mCurrentState == STOPPED) {
+			if(prePlayer != null) {
+				prePlayer.release();
+			}
+
 			cancelNotification();
 		}
 		
@@ -638,6 +693,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 						timerResume();
 						break;
 					case STOPPED:
+						playPreSound();
 						timerStart(mLastTime,true);
 						break;
 				}
@@ -650,6 +706,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 				// that are not running (e.g. if we're paused)
 				switch(mCurrentState){
 					case RUNNING:
+						if(prePlayer != null) {
+							prePlayer.release();
+						}
 						cancelNotification();
 						timerStop();
 						break;

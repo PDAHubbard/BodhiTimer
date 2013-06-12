@@ -38,6 +38,12 @@
 	<string name="playing_sound">Stop Sound</string>
 	<string name="playing_sound_desc">Click to stop the current playing sound.</string>
 
+	<string name="pre_sound">Start Sound</string>
+	<string name="pre_sound_desc">Optional sound to play when timer starts</string>
+	
+	<string name="play_pre_sound">Test Start Sound</string>
+	<string name="play_pre_sound_desc">Play the current start sound.</string>
+		
 	<string name="volume">Sound Volume</string>
 	<string name="volume_desc">as percent of media volume setting</string>
 			
