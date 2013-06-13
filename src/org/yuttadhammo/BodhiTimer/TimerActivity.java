@@ -123,7 +123,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 	private long timeStamp;
 	
-	public static final String BROADCAST = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
+	public static final String BROADCAST_TICK = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
+	public static final String BROADCAST_START = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_START";
 	
 	/** Called when the activity is first created.
      *	{ @inheritDoc} 
@@ -143,7 +144,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         }
 
         tickIntent = PendingIntent.getBroadcast(this, 1,
-				new Intent(BROADCAST), PendingIntent.FLAG_UPDATE_CURRENT);
+				new Intent(BROADCAST_TICK), PendingIntent.FLAG_UPDATE_CURRENT);
 
         mCancelButton = (ImageButton)findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(this);
@@ -246,7 +247,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         lastTimes[2] = mSettings.getInt("last_sec", 0);
 		
 		// register receiver to update the GUI
-		IntentFilter filter=new IntentFilter(BROADCAST);
+		IntentFilter filter=new IntentFilter(BROADCAST_TICK);
 		filter.setPriority(2);
 		registerReceiver(onTick, filter);
 
@@ -273,11 +274,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		if(mSettings.getBoolean("FULLSCREEN", false))
 				getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
 		
-    	if(Integer.parseInt(android.os.Build.VERSION.SDK) >= 11) {
-	    	View rootView = getWindow().getDecorView();
-	    	rootView.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
-	    	rootView.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
-        }
+		setLowProfile();
 
     	if(mSettings.getBoolean("FULLSCREEN", false))
 			getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
@@ -293,7 +290,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         animationIndex = mSettings.getInt("DrawingIndex",0);
         
         mTimerAnimation.setIndex(animationIndex);
-        int state = mSettings.getInt("State",0);
+        int state = mSettings.getInt("State",STOPPED);
     	if(state == STOPPED)
     		cancelNotification();
         
@@ -311,7 +308,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     	        	Log.i(TAG,"Still have a timer");
     	    		mTime = (int) (then.getTime() - now.getTime());
 
-            		mCurrentState = RUNNING;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+            		mCurrentState = RUNNING;
+            		
+            		onUpdateTime();
+            		
             	// All finished
             	}else{
             		timerStop();
@@ -334,6 +334,14 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         		break;  	
         }
 		widget = false;
+	}
+
+	@SuppressLint("NewApi")
+	private void setLowProfile() {
+    	if(android.os.Build.VERSION.SDK_INT >= 14) {
+	    	View rootView = getWindow().getDecorView();
+	    	rootView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        }		
 	}
 
 	@Override
@@ -398,8 +406,11 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		if(time == 0)
 			time = mLastTime;
 		
-        time = Math.round(time/1000)*1000;  // round to seconds
-        mTimerLabel.setText(TimerUtils.time2hms(time));
+        int rtime = Math.round(((float) time)/1000)*1000;  // round to seconds
+
+        Log.v(TAG,"rounding time: "+time+" "+rtime);
+        
+        mTimerLabel.setText(TimerUtils.time2hms(rtime));
 
 		//mTimerLabel2.setText(str[1]);
 	}
@@ -420,9 +431,11 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		int sec = number[2];
 		
 		mLastTime = hour*60*60*1000 + min*60*1000 + sec*1000;
+		mTime = mLastTime;
+		Log.v(TAG,"Picked time: "+mLastTime);
 
-		Log.v(TAG,"Picked numbers: "+mLastTime);
-		
+		onUpdateTime();
+
 		lastTimes = new int[3];
 		
 		lastTimes[0] = hour;
@@ -525,7 +538,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	 */
 	private void timerStart(int time,boolean service)
 	{
-		if(LOG) Log.v(TAG,"Starting the timer...");
+		if(LOG) Log.v(TAG,"Starting the timer: "+time);
 		
 		enterState(RUNNING);
 
@@ -537,7 +550,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		editor.putLong("TimeStamp", timeStamp);
         editor.commit();
 
-		
 		// Start external service
 		if(service){
 		    if(LOG) Log.v(TAG,"Starting the timer service: "+ TimerUtils.time2humanStr(context, mLastTime));
@@ -547,6 +559,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		    mAlarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + time, mPendingIntent);	    
 		}
 
+		// send start broadcast for widgets
+		
+		sendBroadcast(new Intent(BROADCAST_START));
+		
 		// start broadcasting ticks
 	    if(LOG) Log.v(TAG,"Start ticking...");
 
@@ -667,6 +683,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	public void onClick(View v) 
 	{
 
+		setLowProfile();
+		
 		if(mCurrentState == STOPPED) {
 			if(prePlayer != null) {
 				prePlayer.release();
@@ -758,6 +776,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	
 	private BroadcastReceiver onTick = new BroadcastReceiver() {
 		public void onReceive(Context ctxt, Intent i) {
+			Log.d(TAG,"Tick");
 
 			Date now = new Date();
 			Date then = new Date(timeStamp);

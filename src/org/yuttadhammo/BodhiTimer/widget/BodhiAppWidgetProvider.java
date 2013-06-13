@@ -34,40 +34,55 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     private static int state;
 
 	private static Bitmap bmp = null;
-    
+
+	private ComponentName appWidgets;
+
+	private AppWidgetManager appWidgetManager;
+
+	/** debug string */
+	private final static String TAG = "BodhiAppWidgetProvider";
+  
     public void onUpdate(Context context, final AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 
-    	//Log.i("Timer Widget","update");
-    	startTicking(context);
+    	//Log.i(TAG,"update");
+		doUpdate(context);
     }
    
 
 	/**
 	* Sending this broadcast intent will cause the clock widgets to update.
 	*/
+	public static String ACTION_CLOCK_START = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_START";
 	public static String ACTION_CLOCK_UPDATE = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
 	public static String ACTION_CLOCK_CANCEL = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_CANCEL";
+
+	private static RemoteViews views;
+
+	private static long timeStamp;
+
+	private static int mLastTime;
+
+	private static AlarmManager alarmManager;
+
+	private static int themeid;
 	
 	@Override
 	public void onEnabled(Context context) {
 		super.onEnabled(context);
-    	Log.i("Timer Widget","enabled");
+    	Log.i(TAG,"enabled");
+		doUpdate(context);
 
-    	startTicking(context);
-	
 	}
 
 	@Override
 	public void onDisabled(Context context) {
 		super.onDisabled(context);
 	
-		final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 	
-		alarmManager.cancel(createUpdate(context));
 	}
 
     public void onDeleted(Context context, int[] appWidgetIds) {
-        Log.d("Timer Widget", "onDeleted");
+        Log.d(TAG, "onDeleted");
         // When the user deletes the widget, delete the preference associated with it.
         final int N = appWidgetIds.length;
         for (int i=0; i<N; i++) {
@@ -76,137 +91,117 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     }
 	
 	@Override
-	public void onReceive(Context context, Intent intent) {
-		super.onReceive(context, intent);
+	public void onReceive(Context context, Intent i) {
+		super.onReceive(context, i);
 
-		final String action = intent.getAction();
+		final String action = i.getAction();
 	
-		if (ACTION_CLOCK_UPDATE.equals(action) || ACTION_CLOCK_CANCEL.equals(action)){
-            //Log.d("Timer Widget", "received broadcast");
-			final ComponentName appWidgets = new ComponentName(context.getPackageName(), getClass().getName());
-			final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-			final int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
-			if (ids.length > 0){
-	            final int N = ids.length;
-	            for (int i=0; i<N; i++) {
-	                updateAppWidget(context, appWidgetManager, ids[i]);
-	            }
-			}
+		appWidgetManager = AppWidgetManager.getInstance(context);
+		appWidgets = new ComponentName(context.getPackageName(), getClass().getName());
+		
+		if (!ACTION_CLOCK_UPDATE.equals(action))
+			doUpdate(context);
+
+        //Log.d(TAG, "received broadcast");
+		final int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
+		if (ids.length > 0){
+            for (int idx=0; idx<ids.length; idx++) {
+                updateAppWidget(context, appWidgetManager, ids[idx]);
+            }
 		}
 	}
-
-	/**
-	* Schedules an alarm to update the clock every minute, at the top of the minute.
-	*
-	* @param context
-	*/
-	private void startTicking(Context context){
-		final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 	
-		// schedules updates so they occur on the top of the second
-		final Calendar c = Calendar.getInstance();
-		c.setTimeInMillis(System.currentTimeMillis());
-		c.set(Calendar.MILLISECOND, 0);
-		c.add(Calendar.SECOND,1);
+	private void doUpdate(Context context) {
+    	Log.i(TAG,"updating");
 
-		alarmManager.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), 1000, createUpdate(context));
-	}
+    	mSettings = PreferenceManager.getDefaultSharedPreferences(context);
+        
+    	if(!mSettings.getBoolean("custom_bmp", false) || mSettings.getString("bmp_url","").length() == 0) {
+			Resources resources = context.getResources();
+			bmp = BitmapFactory.decodeResource(resources, R.drawable.leaf);
+		}
+		else {
+			String bmpUrl = mSettings.getString("bmp_url", "");
+			Uri selectedImage = Uri.parse(bmpUrl);
+            InputStream imageStream = null;
+			try {
+				imageStream = context.getContentResolver().openInputStream(selectedImage);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+            bmp = BitmapFactory.decodeStream(imageStream);
+		}
+    
+   		timeStamp = mSettings.getLong("TimeStamp", -1);
+		mLastTime = mSettings.getInt("LastTime",0); 
+		state = mSettings.getInt("State",TimerActivity.STOPPED); 
+		alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-	/**
-	* Creates an intent to update the clock(s).
-	*
-	* @param context
-	* @return
-	*/
-	private static PendingIntent createUpdate(Context context){
-		return PendingIntent.getBroadcast(context, 0,
-				new Intent(ACTION_CLOCK_UPDATE), PendingIntent.FLAG_UPDATE_CURRENT);
+		appWidgetManager = AppWidgetManager.getInstance(context);
+		appWidgets = new ComponentName(context.getPackageName(), getClass().getName());
+
+    	Intent intent = new Intent(context, TimerActivity.class);
+        intent.putExtra("set", "true");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		
+		final int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
+		if (ids.length > 0){
+            for (int idx=0; idx<ids.length; idx++) {
+
+        		views = new RemoteViews(context.getPackageName(), R.layout.appwidget);
+        		
+        		// Get the layout for the App Widget and attach an on-click listener
+                // to the button
+            	views.setOnClickPendingIntent(R.id.mainImage, pendingIntent);
+            	
+            	
+                // set background
+                themeid = mSettings.getInt("widget_theme_"+ids[idx], R.drawable.widget_background_black_square);
+            	views.setImageViewResource(R.id.backImage, themeid);
+                appWidgetManager.updateAppWidget(ids[idx], views);
+            }
+		}
 	}
+	
 	
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
             int appWidgetId) {
-        //Log.d("Timer Widget", "updateAppWidget appWidgetId=" + appWidgetId);
+        //Log.d(TAG, "updateAppWidget appWidgetId=" + appWidgetId);
 
-        // Construct the RemoteViews object.  It takes the package name (in our case, it's our
-        // package, but it needs this because on the other side it's the widget host inflating
-        // the layout from our package).
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.appwidget);
+		views = new RemoteViews(context.getPackageName(), R.layout.appwidget);
 
-		mSettings = PreferenceManager.getDefaultSharedPreferences(context);
-       
-		// set image
-		       	
-       	if(bmp == null) {
-        	if(!mSettings.getBoolean("custom_bmp", false) || mSettings.getString("bmp_url","").length() == 0) {
-    			Resources resources = context.getResources();
-    			bmp = BitmapFactory.decodeResource(resources, R.drawable.leaf);
-    		}
-    		else {
-    			String bmpUrl = mSettings.getString("bmp_url", "");
-    			Uri selectedImage = Uri.parse(bmpUrl);
-                InputStream imageStream = null;
-    			try {
-    				imageStream = context.getContentResolver().openInputStream(selectedImage);
-    			} catch (FileNotFoundException e) {
-    				// TODO Auto-generated catch block
-    				e.printStackTrace();
-    			}
-                bmp = BitmapFactory.decodeStream(imageStream);
-    		}
-       	}
-        
-
-        
-		long timeStamp = mSettings.getLong("TimeStamp", -1);
-        
 		Date now = new Date();
 		Date then = new Date(timeStamp);
 
 		int delta = (int)(then.getTime() - now.getTime());		
         
-        int mLastTime = mSettings.getInt("LastTime",0); 
-        
-        state = mSettings.getInt("State",0);
-        //Log.d("Timer Widget", "state=" + state);
+        //Log.d(TAG, "Delta: "+delta);
     	
 		float p = (mLastTime != 0) ? (delta/(float)mLastTime) : 0;
-
+		
 		// We still have a timer running!
 		if(then.after(now) && state == TimerActivity.RUNNING){
+	        Log.d(TAG, "running");
     		
 	   		views.setTextViewText(R.id.time, getTime(delta-1000));
     	}
 		else if(state == TimerActivity.PAUSED){
+	        Log.d(TAG, "paused");
 
 			Integer time = mSettings.getInt("CurrentTime",0);
-	        time = Math.round(time/1000)*1000;  // round to seconds
-            views.setTextViewText(R.id.time, TimerUtils.time2hms(time));
-    		final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-    		alarmManager.cancel(createUpdate(context));
+	        int rtime = Math.round(((float) time)/1000)*1000;  // round to seconds
+            views.setTextViewText(R.id.time, TimerUtils.time2hms(rtime));
 		}
 		else {
+	        Log.d(TAG, "stopped");
             views.setTextViewText(R.id.time, "");
-    		final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     		
-    		alarmManager.cancel(createUpdate(context));
     	}
     	
     	views.setImageViewBitmap(R.id.mainImage, then.after(now) && state == TimerActivity.RUNNING?adjustOpacity(bmp,(int)(255-(255*p))):bmp);
 		
-        // Get the layout for the App Widget and attach an on-click listener
-        // to the button
-        Intent intent = new Intent(context, TimerActivity.class);
-        intent.putExtra("set", "true");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        
-    	views.setOnClickPendingIntent(R.id.mainImage, pendingIntent);
-    	
-        // set background
-        int themeid = mSettings.getInt("widget_theme_"+appWidgetId, R.drawable.widget_background_black_square);
-    	views.setImageViewResource(R.id.backImage, themeid);
-
         // Tell the widget manager
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
