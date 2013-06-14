@@ -3,6 +3,8 @@ package org.yuttadhammo.BodhiTimer.widget;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.yuttadhammo.BodhiTimer.R;
 import org.yuttadhammo.BodhiTimer.TimerActivity;
@@ -14,6 +16,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -35,12 +39,18 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 
 	private static Bitmap bmp = null;
 
-	private ComponentName appWidgets;
+	private static ComponentName appWidgets;
 
-	private AppWidgetManager appWidgetManager;
+	private static AppWidgetManager appWidgetManager;
+
+	private static Context mContext;
 
 	/** debug string */
 	private final static String TAG = "BodhiAppWidgetProvider";
+
+	private static Timer mTimer;
+
+	private static boolean stopTicking;
   
     public void onUpdate(Context context, final AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 
@@ -95,18 +105,23 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 		super.onReceive(context, i);
 
 		final String action = i.getAction();
-	
+		
+		if(action.equals(TimerActivity.BROADCAST_STOP))
+			stopTicking = true;
+		else
+			stopTicking = false;
+		
 		appWidgetManager = AppWidgetManager.getInstance(context);
 		appWidgets = new ComponentName(context.getPackageName(), getClass().getName());
+		mContext = context;
 		
-		if (!ACTION_CLOCK_UPDATE.equals(action))
-			doUpdate(context);
+		doUpdate(context);
+        doTick();
 
         //Log.d(TAG, "received broadcast");
 		final int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
 		if (ids.length > 0){
             for (int idx=0; idx<ids.length; idx++) {
-                updateAppWidget(context, appWidgetManager, ids[idx]);
             }
 		}
 	}
@@ -132,7 +147,8 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
             bmp = BitmapFactory.decodeStream(imageStream);
 		}
     
-   		timeStamp = mSettings.getLong("TimeStamp", -1);
+		mTimer = new Timer();
+  		timeStamp = mSettings.getLong("TimeStamp", -1);
 		mLastTime = mSettings.getInt("LastTime",0); 
 		state = mSettings.getInt("State",TimerActivity.STOPPED); 
 		alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -166,11 +182,13 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	}
 	
 	
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-            int appWidgetId) {
-        //Log.d(TAG, "updateAppWidget appWidgetId=" + appWidgetId);
+    static void doTick() {
+		//Log.e(TAG,"ticking");
+		final int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
+		if (ids.length == 0 || stopTicking)
+			return;
 
-		views = new RemoteViews(context.getPackageName(), R.layout.appwidget);
+		views = new RemoteViews(mContext.getPackageName(), R.layout.appwidget);
 
 		Date now = new Date();
 		Date then = new Date(timeStamp);
@@ -179,13 +197,19 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         
         //Log.d(TAG, "Delta: "+delta);
     	
-		float p = (mLastTime != 0) ? (delta/(float)mLastTime) : 0;
-		
 		// We still have a timer running!
 		if(then.after(now) && state == TimerActivity.RUNNING){
-	        Log.d(TAG, "running");
-    		
-	   		views.setTextViewText(R.id.time, getTime(delta-1000));
+	        //Log.d(TAG, "running");
+	   		views.setTextViewText(R.id.time, getTime(delta));
+			mTimer.schedule( new TimerTask(){
+		        	public void run() {
+		        		if(mHandler != null){
+		        			mHandler.sendEmptyMessage(0);
+		        		}
+		        	}
+		      	},
+		      	TimerActivity.TIMER_TIC
+			);
     	}
 		else if(state == TimerActivity.PAUSED){
 	        Log.d(TAG, "paused");
@@ -197,13 +221,15 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 		else {
 	        Log.d(TAG, "stopped");
             views.setTextViewText(R.id.time, "");
-    		
     	}
     	
-    	views.setImageViewBitmap(R.id.mainImage, then.after(now) && state == TimerActivity.RUNNING?adjustOpacity(bmp,(int)(255-(255*p))):bmp);
+		float p = (mLastTime != 0) ? (delta/(float)mLastTime) : 0;
+		views.setImageViewBitmap(R.id.mainImage, then.after(now) && state == TimerActivity.RUNNING?adjustOpacity(bmp,(int)(255-(255*p))):bmp);
 		
         // Tell the widget manager
-        appWidgetManager.updateAppWidget(appWidgetId, views);
+        for (int idx=0; idx<ids.length; idx++) {
+            appWidgetManager.updateAppWidget(ids[idx], views);
+        }
     }
 
     
@@ -243,4 +269,13 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 
 	}
 
+	/** Handler for the message from the timer service */
+	private static Handler mHandler = new Handler() {
+		
+		@Override
+        public void handleMessage(Message msg) {
+			doTick();
+		}
+    };
+	
 }

@@ -18,6 +18,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -40,6 +43,8 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 // import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.PowerManager.WakeLock;
@@ -76,7 +81,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private final String TAG = getClass().getSimpleName();
 	
 	/** Update rate of the internal timer */
-	private final int TIMER_TIC = 1000;
+	public final static int TIMER_TIC = 100;
 	
 	/** The timer's current state */
 	public int mCurrentState = -1;
@@ -108,12 +113,11 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	public NotificationManager mNM;
 
 	private boolean widget;
+	private boolean isPaused;
 
 	private int[] lastTimes;
 
 	private TimerActivity context;
-
-	private static PendingIntent tickIntent;
 
 	private int animationIndex;
 
@@ -123,8 +127,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 	private long timeStamp;
 	
-	public static final String BROADCAST_TICK = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
-	public static final String BROADCAST_START = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_START";
+	public static final String BROADCAST_UPDATE = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
+	public static final String BROADCAST_STOP = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_CANCEL";
 	
 	/** Called when the activity is first created.
      *	{ @inheritDoc} 
@@ -143,8 +147,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         	this.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
         }
 
-        tickIntent = PendingIntent.getBroadcast(this, 1,
-				new Intent(BROADCAST_TICK), PendingIntent.FLAG_UPDATE_CURRENT);
 
         mCancelButton = (ImageButton)findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(this);
@@ -194,7 +196,9 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     public void onPause()
     {
     	super.onPause();
-
+    	isPaused = true; // tell gui timer to stop
+		sendBroadcast(new Intent(BROADCAST_UPDATE)); // tell widgets to update
+		
     	BitmapDrawable drawable = (BitmapDrawable)mTimerAnimation.getDrawable();
     	if(drawable != null) {
 		    Bitmap bitmap = drawable.getBitmap();
@@ -230,7 +234,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         
         editor.commit();
 
-        unregisterReceiver(onTick);
     }
    
 
@@ -241,16 +244,15 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     {
     	super.onResume();
 		Log.d(TAG,"Resuming");
+    	isPaused = false;
+		sendBroadcast(new Intent(BROADCAST_STOP)); // tell widgets to stop updating
+        mTimer = new Timer();
 
         lastTimes[0] = mSettings.getInt("last_hour", 0);
         lastTimes[1] = mSettings.getInt("last_min", 0);
         lastTimes[2] = mSettings.getInt("last_sec", 0);
 		
 		// register receiver to update the GUI
-		IntentFilter filter=new IntentFilter(BROADCAST_TICK);
-		filter.setPriority(2);
-		registerReceiver(onTick, filter);
-
 		
 		if(getIntent().hasExtra("set")) {
 			Log.d(TAG,"Create From Widget");
@@ -310,7 +312,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
             		mCurrentState = RUNNING;
             		
-            		onUpdateTime();
+            		doTick();
             		
             	// All finished
             	}else{
@@ -333,6 +335,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         		enterState(PAUSED);
         		break;  	
         }
+        mCurrentState = state;
 		widget = false;
 	}
 
@@ -408,7 +411,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		
         int rtime = Math.round(((float) time)/1000)*1000;  // round to seconds
 
-        Log.v(TAG,"rounding time: "+time+" "+rtime);
+        //Log.v(TAG,"rounding time: "+time+" "+rtime);
         
         mTimerLabel.setText(TimerUtils.time2hms(rtime));
 
@@ -466,6 +469,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		timerStart(mLastTime,true);
 		
 		if(widget == true) {
+			sendBroadcast(new Intent(BROADCAST_UPDATE)); // tell widgets to update
 			finish();		
 		}
 	}
@@ -561,17 +565,26 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 		// send start broadcast for widgets
 		
-		sendBroadcast(new Intent(BROADCAST_START));
-		
-		// start broadcasting ticks
+		// start ticking
 	    if(LOG) Log.v(TAG,"Start ticking...");
 
+		mTimer.schedule( 
+			new TimerTask(){
+	        	public void run() {
+	        		if(mHandler != null){
+	        			mHandler.sendEmptyMessage(0);
+	        		}
+	        	}
+	      	},
+	      	TIMER_TIC
+		);
+		
 		final Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(System.currentTimeMillis());
 		c.set(Calendar.MILLISECOND, 0);
 		c.add(Calendar.SECOND,1);
-		mAlarmMgr.cancel(tickIntent);
-		mAlarmMgr.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), TIMER_TIC, tickIntent);
+		//mAlarmMgr.cancel(tickIntent);
+		//mAlarmMgr.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), TIMER_TIC, tickIntent);
 
 	}
 
@@ -583,7 +596,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	{		
 		if(LOG) Log.v(TAG,"Timer stopped");
 		
-		mAlarmMgr.cancel(tickIntent);
 		clearTime();
 		
 		// Stop our timer service
@@ -609,7 +621,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         editor.putInt("CurrentTime",mTime);
         editor.commit();
         
-		mAlarmMgr.cancel(tickIntent);
 		stopAlarmTimer();
 		
 		enterState(PAUSED);
@@ -620,9 +631,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	{
 		mTime = 0;
 		onUpdateTime();
-		Intent broadcast = new Intent();
-        broadcast.setAction("org.yuttadhammo.BodhiTimer.ACTION_CLOCK_CANCEL");
-		sendBroadcast(broadcast);
 	}
 
 
@@ -774,32 +782,53 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 
 	}
 	
-	private BroadcastReceiver onTick = new BroadcastReceiver() {
-		public void onReceive(Context ctxt, Intent i) {
-			Log.d(TAG,"Tick");
+	private Timer mTimer;
 
-			Date now = new Date();
-			Date then = new Date(timeStamp);
+	private void doTick() {
+		//Log.w(TAG,"ticking");
 
-			mTime = (int)(then.getTime() - now.getTime());	
+		if(mCurrentState != RUNNING || isPaused)
+			return;
+		
+		Date now = new Date();
+		Date then = new Date(timeStamp);
+
+		mTime = (int)(then.getTime() - now.getTime());	
+		
+		if(mTime <= 0){
 			
-			if(mTime <= 0){
-				
-				Log.e(TAG,"Time up");
-				
-				timerStop();
-				
-				if(mSettings.getBoolean("AutoRestart", false)) {
-					if(LOG) Log.v(TAG,"Restarting at " + mLastTime);
-					mTime = mLastTime;
-					timerStart(mLastTime,false);
-				}
-				
-			// Update the time
-			}else{
-				//enterState(RUNNING);
-				onUpdateTime();
+			Log.e(TAG,"Time up");
+			
+			timerStop();
+			
+			if(mSettings.getBoolean("AutoRestart", false)) {
+				if(LOG) Log.v(TAG,"Restarting at " + mLastTime);
+				mTime = mLastTime;
+				timerStart(mLastTime,false);
 			}
+			
+		// Update the time
+		}else{
+			// Internal thread to properly update the GUI
+			mTimer.schedule( new TimerTask(){
+		        	public void run() {
+		        		if(mHandler != null){
+		        			mHandler.sendEmptyMessage(0);
+		        		}
+		        	}
+		      	},
+		      	TIMER_TIC
+			);
 		}
-	};
+	}
+	
+	/** Handler for the message from the timer service */
+	private Handler mHandler = new Handler() {
+		
+		@Override
+        public void handleMessage(Message msg) {
+			onUpdateTime();
+			doTick();
+		}
+    };
 }
