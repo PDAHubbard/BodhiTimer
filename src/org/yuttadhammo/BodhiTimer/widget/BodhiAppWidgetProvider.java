@@ -14,6 +14,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
@@ -21,8 +22,6 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.RemoteViews;
-import java.util.Calendar;
-
 import android.app.AlarmManager;
 import android.content.ComponentName;
 import android.content.res.Resources;
@@ -51,10 +50,17 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	private static Timer mTimer;
 
 	private static boolean stopTicking;
-  
+	
+	private boolean isRegistered = false;
+	
     public void onUpdate(Context context, final AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+    	Log.i(TAG,"onUpdate");
 
-    	//Log.i(TAG,"update");
+    	if(!isRegistered) {
+	        context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_ON));
+	        context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+	        isRegistered = true;
+    	}
 		doUpdate(context);
     }
    
@@ -72,20 +78,19 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 
 	private static int mLastTime;
 
-	private static AlarmManager alarmManager;
-
 	private static int themeid;
 	
 	@Override
 	public void onEnabled(Context context) {
-		super.onEnabled(context);
-    	Log.i(TAG,"enabled");
+		super.onEnabled(context); 
+    	Log.i(TAG,"onEnabled");
 		doUpdate(context);
 
 	}
 
 	@Override
 	public void onDisabled(Context context) {
+    	Log.i(TAG,"onDisabled");
 		super.onDisabled(context);
 	
 	
@@ -106,7 +111,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 
 		final String action = i.getAction();
 		
-		if(action.equals(TimerActivity.BROADCAST_STOP))
+		if(action.equals(TimerActivity.BROADCAST_STOP) || action.equals(Intent.ACTION_SCREEN_OFF))
 			stopTicking = true;
 		else
 			stopTicking = false;
@@ -114,7 +119,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 		appWidgetManager = AppWidgetManager.getInstance(context);
 		appWidgets = new ComponentName(context.getPackageName(), getClass().getName());
 		mContext = context;
-		
+
 		doUpdate(context);
         doTick();
 
@@ -151,7 +156,6 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
   		timeStamp = mSettings.getLong("TimeStamp", -1);
 		mLastTime = mSettings.getInt("LastTime",0); 
 		state = mSettings.getInt("State",TimerActivity.STOPPED); 
-		alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
 		appWidgetManager = AppWidgetManager.getInstance(context);
 		appWidgets = new ComponentName(context.getPackageName(), getClass().getName());
@@ -182,7 +186,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	}
 	
 	
-    static void doTick() {
+    private static void doTick() {
 		//Log.e(TAG,"ticking");
 		final int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
 		if (ids.length == 0 || stopTicking)
