@@ -143,11 +143,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         
         context = this;
         
-        if(Integer.parseInt(android.os.Build.VERSION.SDK) >= 11) {
-        	this.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
-        }
-
-
         mCancelButton = (ImageButton)findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(this);
         
@@ -185,9 +180,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         
         //enterState(STOPPED);
 
-		if(mSettings.getBoolean("WakeLock", false))
-			getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
-        
 		mSettings.registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -272,11 +264,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			mTimerLabel.setVisibility(View.INVISIBLE);
 		else
 			mTimerLabel.setVisibility(View.VISIBLE);
-
-		if(mSettings.getBoolean("FULLSCREEN", false))
-				getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
 		
 		setLowProfile();
+		if(mSettings.getBoolean("WakeLock", false))
+			getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     	if(mSettings.getBoolean("FULLSCREEN", false))
 			getWindow().setFlags(LayoutParams.FLAG_FULLSCREEN, LayoutParams.FLAG_FULLSCREEN);
