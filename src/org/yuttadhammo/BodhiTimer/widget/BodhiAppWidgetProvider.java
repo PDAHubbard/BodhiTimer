@@ -2,6 +2,7 @@ package org.yuttadhammo.BodhiTimer.widget;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -36,7 +37,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 
     private static int state;
 
-	private static Bitmap bmp = null;
+	private static Bitmap originalBitmap = null;
 
 	private static ComponentName appWidgets;
 
@@ -52,22 +53,11 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	private static boolean stopTicking;
 	
 	private boolean isRegistered = false;
-	
-    public void onUpdate(Context context, final AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-    	Log.i(TAG,"onUpdate");
 
-    	if(!isRegistered) {
-	        context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_ON));
-	        context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-	        isRegistered = true;
-    	}
-		doUpdate(context);
-    }
-   
+	private Bitmap bmp;
 
-	/**
-	* Sending this broadcast intent will cause the clock widgets to update.
-	*/
+	private String[] widgetIds;
+
 	public static String ACTION_CLOCK_START = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_START";
 	public static String ACTION_CLOCK_UPDATE = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
 	public static String ACTION_CLOCK_CANCEL = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_CANCEL";
@@ -80,10 +70,26 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 
 	private static int themeid;
 	
+    public void onUpdate(Context context, final AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+    	Log.i(TAG,"onUpdate");
+
+    	if(!isRegistered) {
+	        context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_ON));
+	        context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+	        isRegistered = true;
+    	}
+		doUpdate(context);
+    }
+   
 	@Override
 	public void onEnabled(Context context) {
 		super.onEnabled(context); 
     	Log.i(TAG,"onEnabled");
+    	if(!isRegistered) {
+	        context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_ON));
+	        context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+	        isRegistered = true;
+    	}    	
 		doUpdate(context);
 
 	}
@@ -116,29 +122,24 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 		else
 			stopTicking = false;
 		
-		appWidgetManager = AppWidgetManager.getInstance(context);
-		appWidgets = new ComponentName(context.getPackageName(), getClass().getName());
 		mContext = context;
 
 		doUpdate(context);
         doTick();
-
-        //Log.d(TAG, "received broadcast");
-		final int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
-		if (ids.length > 0){
-            for (int idx=0; idx<ids.length; idx++) {
-            }
-		}
 	}
 	
 	private void doUpdate(Context context) {
     	Log.i(TAG,"updating");
 
     	mSettings = PreferenceManager.getDefaultSharedPreferences(context);
+
+        if(views == null)
+    		views = new RemoteViews(context.getPackageName(), R.layout.appwidget);
+
         
     	if(!mSettings.getBoolean("custom_bmp", false) || mSettings.getString("bmp_url","").length() == 0) {
 			Resources resources = context.getResources();
-			bmp = BitmapFactory.decodeResource(resources, R.drawable.leaf);
+			originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.leaf);
 		}
 		else {
 			String bmpUrl = mSettings.getString("bmp_url", "");
@@ -149,7 +150,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-            bmp = BitmapFactory.decodeStream(imageStream);
+            originalBitmap = BitmapFactory.decodeStream(imageStream);
 		}
     
 		mTimer = new Timer();
@@ -157,20 +158,32 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 		mLastTime = mSettings.getInt("LastTime",0); 
 		state = mSettings.getInt("State",TimerActivity.STOPPED); 
 
+		// get list of currently visible widgets (or fall back to getting list of all past widgets
+		
 		appWidgetManager = AppWidgetManager.getInstance(context);
 		appWidgets = new ComponentName(context.getPackageName(), getClass().getName());
-
+		String widgeta = mSettings.getString("widgetIds", null);
+		
+		Log.d(TAG,"Widget id list: "+widgeta);
+		
+        if(widgeta == null) {
+    		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+    		ComponentName appWidgets = new ComponentName(context.getPackageName(), "org.yuttadhammo.BodhiTimer.widget.BodhiAppWidgetProvider");
+    		int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
+    		widgeta = ids.length > 0?Arrays.toString(ids).replace("[", ",").replace("]", ","):",";
+        }
+        widgetIds = widgeta.replaceAll("^,",",").replaceAll(",$",",").split(",");
+				
     	Intent intent = new Intent(context, TimerActivity.class);
         intent.putExtra("set", "true");
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
-		final int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
-		if (ids.length > 0){
-            for (int idx=0; idx<ids.length; idx++) {
-
-        		views = new RemoteViews(context.getPackageName(), R.layout.appwidget);
+		if (widgetIds.length > 0){
+            for (int idx=0; idx<widgetIds.length; idx++) {
+            	if(widgetIds[idx].length() == 0)
+            		continue;
         		
         		// Get the layout for the App Widget and attach an on-click listener
                 // to the button
@@ -178,21 +191,18 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
             	
             	
                 // set background
-                themeid = mSettings.getInt("widget_theme_"+ids[idx], R.drawable.widget_background_black_square);
+                themeid = mSettings.getInt("widget_theme_"+widgetIds[idx], R.drawable.widget_background_black_square);
             	views.setImageViewResource(R.id.backImage, themeid);
-                appWidgetManager.updateAppWidget(ids[idx], views);
+                appWidgetManager.updateAppWidget(Integer.parseInt(widgetIds[idx]), views);
             }
 		}
 	}
 	
 	
-    private static void doTick() {
-		//Log.e(TAG,"ticking");
-		final int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
-		if (ids.length == 0 || stopTicking)
+    private void doTick() {
+    	//Log.e(TAG,"ticking");
+		if (widgetIds.length == 0 || stopTicking)
 			return;
-
-		views = new RemoteViews(mContext.getPackageName(), R.layout.appwidget);
 
 		Date now = new Date();
 		Date then = new Date(timeStamp);
@@ -228,11 +238,20 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     	}
     	
 		float p = (mLastTime != 0) ? (delta/(float)mLastTime) : 0;
-		views.setImageViewBitmap(R.id.mainImage, then.after(now) && state == TimerActivity.RUNNING?adjustOpacity(bmp,(int)(255-(255*p))):bmp);
+		
+		if(then.after(now) && state == TimerActivity.RUNNING) { 
+			bmp = adjustOpacity(originalBitmap,(int)(255-(255*p)));
+		}
+		else
+			bmp = originalBitmap;
+		
+		views.setImageViewBitmap(R.id.mainImage, bmp);
 		
         // Tell the widget manager
-        for (int idx=0; idx<ids.length; idx++) {
-            appWidgetManager.updateAppWidget(ids[idx], views);
+        for (int idx=0; idx<widgetIds.length; idx++) {
+        	if(widgetIds[idx].length() == 0)
+        		continue;
+            appWidgetManager.updateAppWidget(Integer.parseInt(widgetIds[idx]), views);
         }
     }
 
@@ -274,7 +293,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	}
 
 	/** Handler for the message from the timer service */
-	private static Handler mHandler = new Handler() {
+	private Handler mHandler = new Handler() {
 		
 		@Override
         public void handleMessage(Message msg) {

@@ -1,10 +1,13 @@
 package org.yuttadhammo.BodhiTimer.widget;
 
+import java.util.Arrays;
+
 import org.yuttadhammo.BodhiTimer.R;
 
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -84,13 +87,37 @@ public class AppWidgetConfigure extends Activity implements OnClickListener {
 	
     // Write the prefix to the SharedPreferences object for this widget
     private void savePref(Context context, int appWidgetId, int theme) {
-        SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        prefs.putInt("widget_theme_" + appWidgetId, theme);
-        prefs.commit();
+
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String widgetIds = prefs.getString("widgetIds", null);
+        if(widgetIds == null) {
+    		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+    		ComponentName appWidgets = new ComponentName(context.getPackageName(), "org.yuttadhammo.BodhiTimer.widget.BodhiAppWidgetProvider");
+    		int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
+			widgetIds = ids.length > 0?Arrays.toString(ids).replace("[", ",").replace("]", ","):",";
+        }
+        
+    	SharedPreferences.Editor editor = prefs.edit();
+    	editor.putInt("widget_theme_" + appWidgetId, theme);
+        if(!widgetIds.contains(","+appWidgetId+","))
+        	widgetIds += +appWidgetId+",";
+    	editor.putString("widgetIds", widgetIds);
+       	editor.commit();
     }
     static void deletePref(Context context, int appWidgetId) {
-        SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        prefs.remove("widget_theme_" + appWidgetId);
-        prefs.commit();    	
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String widgetIds = prefs.getString("widgetIds", null);
+        if(widgetIds == null) {
+    		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+    		ComponentName appWidgets = new ComponentName(context.getPackageName(), "org.yuttadhammo.BodhiTimer.widget.BodhiAppWidgetProvider");
+    		int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
+			widgetIds = ids.length > 0?Arrays.toString(ids).replace("[", ",").replace("]", ","):",";
+        }
+        
+    	SharedPreferences.Editor editor = prefs.edit();
+       	widgetIds = widgetIds.replace(","+appWidgetId+",",",");
+    	editor.putString("widgetIds", widgetIds);
+        editor.remove("widget_theme_" + appWidgetId);
+        editor.commit();    	
     }
 }
