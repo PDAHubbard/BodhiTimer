@@ -83,10 +83,10 @@ public class TimerReceiver extends BroadcastReceiver {
 		Log.v(TAG,"notification uri: "+notificationUri);
 		
 		NotificationCompat.Builder mBuilder =
-		        new NotificationCompat.Builder(context)
-		        .setSmallIcon(R.drawable.notification)
-		        .setContentTitle(text)
-		        .setContentText(textLatest);
+	        new NotificationCompat.Builder(context.getApplicationContext())
+	        .setSmallIcon(R.drawable.notification)
+	        .setContentTitle(text)
+	        .setContentText(textLatest);
 
 		Uri uri = null;
 

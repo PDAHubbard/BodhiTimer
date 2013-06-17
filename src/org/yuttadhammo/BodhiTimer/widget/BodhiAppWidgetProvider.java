@@ -37,13 +37,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 
     private static int state;
 
-	private static Bitmap originalBitmap = null;
-
-	private static ComponentName appWidgets;
-
 	private static AppWidgetManager appWidgetManager;
-
-	private static Context mContext;
 
 	/** debug string */
 	private final static String TAG = "BodhiAppWidgetProvider";
@@ -54,9 +48,13 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	
 	private boolean isRegistered = false;
 
-	private Bitmap bmp;
-
 	private String[] widgetIds;
+
+	private Bitmap originalBitmap;
+
+	private Context mContext;
+
+	private PendingIntent pendingIntent;
 
 	public static String ACTION_CLOCK_START = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_START";
 	public static String ACTION_CLOCK_UPDATE = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
@@ -122,8 +120,6 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 		else
 			stopTicking = false;
 		
-		mContext = context;
-
 		doUpdate(context);
         doTick();
 	}
@@ -132,10 +128,17 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     	Log.i(TAG,"updating");
 
     	mSettings = PreferenceManager.getDefaultSharedPreferences(context);
-
+    	mContext = context;
         if(views == null)
     		views = new RemoteViews(context.getPackageName(), R.layout.appwidget);
 
+        if(pendingIntent == null) {
+        	Intent intent = new Intent(context, TimerActivity.class);
+            intent.putExtra("set", "true");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
         
     	if(!mSettings.getBoolean("custom_bmp", false) || mSettings.getString("bmp_url","").length() == 0) {
 			Resources resources = context.getResources();
@@ -150,7 +153,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-            originalBitmap = BitmapFactory.decodeStream(imageStream);
+			originalBitmap = BitmapFactory.decodeStream(imageStream);
 		}
     
 		mTimer = new Timer();
@@ -161,7 +164,6 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 		// get list of currently visible widgets (or fall back to getting list of all past widgets
 		
 		appWidgetManager = AppWidgetManager.getInstance(context);
-		appWidgets = new ComponentName(context.getPackageName(), getClass().getName());
 		String widgeta = mSettings.getString("widgetIds", null);
 		
 		Log.d(TAG,"Widget id list: "+widgeta);
@@ -174,12 +176,6 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         }
         widgetIds = widgeta.replaceAll("^,",",").replaceAll(",$",",").split(",");
 				
-    	Intent intent = new Intent(context, TimerActivity.class);
-        intent.putExtra("set", "true");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		
 		if (widgetIds.length > 0){
             for (int idx=0; idx<widgetIds.length; idx++) {
             	if(widgetIds[idx].length() == 0)
@@ -203,6 +199,8 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     	//Log.e(TAG,"ticking");
 		if (widgetIds.length == 0 || stopTicking)
 			return;
+
+		views = new RemoteViews(mContext.getPackageName(), R.layout.appwidget);
 
 		Date now = new Date();
 		Date then = new Date(timeStamp);
@@ -239,7 +237,8 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     	
 		float p = (mLastTime != 0) ? (delta/(float)mLastTime) : 0;
 		
-		if(then.after(now) && state == TimerActivity.RUNNING) { 
+		Bitmap bmp;
+		if(then.after(now) && state == TimerActivity.RUNNING) {
 			bmp = adjustOpacity(originalBitmap,(int)(255-(255*p)));
 		}
 		else
@@ -251,7 +250,12 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         for (int idx=0; idx<widgetIds.length; idx++) {
         	if(widgetIds[idx].length() == 0)
         		continue;
-            appWidgetManager.updateAppWidget(Integer.parseInt(widgetIds[idx]), views);
+        	views.setOnClickPendingIntent(R.id.mainImage, pendingIntent);
+        	
+            // set background
+            themeid = mSettings.getInt("widget_theme_"+widgetIds[idx], R.drawable.widget_background_black_square);
+        	views.setImageViewResource(R.id.backImage, themeid);
+        	appWidgetManager.updateAppWidget(Integer.parseInt(widgetIds[idx]), views);
         }
     }
 

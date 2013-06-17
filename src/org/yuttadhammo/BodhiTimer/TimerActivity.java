@@ -84,7 +84,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	public final static int TIMER_TIC = 100;
 	
 	/** The timer's current state */
-	public int mCurrentState = -1;
+	public int mCurrentState = STOPPED;
 	
 	/** The maximum time */
 	private int mLastTime = 0;
@@ -301,7 +301,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
     	        	Log.i(TAG,"Still have a timer");
     	    		mTime = (int) (then.getTime() - now.getTime());
 
-            		mCurrentState = RUNNING;
+            		enterState(RUNNING);
             		
             		doTick();
             		
@@ -313,6 +313,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         	
         	case STOPPED:
                 mNM.cancelAll();
+        		mCurrentState = -1;
         		enterState(STOPPED);
         		if(widget) {
         			showNumberPicker();
