@@ -84,7 +84,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	public final static int TIMER_TIC = 100;
 	
 	/** The timer's current state */
-	public int mCurrentState = STOPPED;
+	public static int mCurrentState = -1;
 	
 	/** The maximum time */
 	private int mLastTime = 0;
@@ -211,17 +211,13 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         switch(mCurrentState){
         
         	case RUNNING:
-        	{
 	        	Log.i(TAG,"pause while running: "+new Date().getTime() + mTime);
-        		
-        	}break;
-        	
+	        	break;
         	case STOPPED:
         		cancelNotification();
         	case PAUSED:
-        	{
         		editor.putLong("TimeStamp", 1);
-        	}break;
+        		break;
         }
         
         editor.commit();
@@ -286,8 +282,8 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         int state = mSettings.getInt("State",STOPPED);
     	if(state == STOPPED)
     		cancelNotification();
-        
-        switch(state)
+
+    	switch(state)
         {
         	case RUNNING:
 	        	Log.i(TAG,"Resume while running: "+mSettings.getLong("TimeStamp", -1));
@@ -298,7 +294,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
             	
             	// We still have a timer running!
             	if(then.after(now)){
-    	        	Log.i(TAG,"Still have a timer");
+    	        	if(LOG) Log.i(TAG,"Still have a timer");
     	    		mTime = (int) (then.getTime() - now.getTime());
 
             		enterState(RUNNING);
@@ -307,14 +303,14 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
             		
             	// All finished
             	}else{
+            		cancelNotification();
             		timerStop();
             	}
             	break;
         	
         	case STOPPED:
                 mNM.cancelAll();
-        		mCurrentState = -1;
-        		enterState(STOPPED);
+        		timerStop();
         		if(widget) {
         			showNumberPicker();
         			return;
@@ -327,7 +323,6 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         		enterState(PAUSED);
         		break;  	
         }
-        mCurrentState = state;
 		widget = false;
 	}
 
@@ -401,7 +396,7 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		if(time == 0)
 			time = mLastTime;
 		
-        int rtime = Math.round(((float) time)/1000)*1000;  // round to seconds
+        int rtime = (int) (Math.ceil(((float) time)/1000)*1000);  // round to seconds
 
         //Log.v(TAG,"rounding time: "+time+" "+rtime);
         
@@ -474,51 +469,44 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	 * @param state the visual state that is being entered
 	 */
 	private void enterState(int state){
-
 		if(mCurrentState != state){
 
 			// update preference for widget, notification
 			
+			if(LOG) Log.v(TAG,"From/to states: "+mCurrentState+" "+state);
 	        SharedPreferences.Editor editor = mSettings.edit();
 	        editor.putInt("State", state);
 	        editor.commit();
+			mCurrentState = state;		
 			
-			if(LOG) Log.v(TAG,"Set current state = " + mCurrentState);
 			
 			switch(state)
 			{
 				case RUNNING:
-				{
 					mSetButton.setVisibility(View.GONE);
 					mCancelButton.setVisibility(View.VISIBLE);
 					mPauseButton.setVisibility(View.VISIBLE);
 					mPauseButton.setImageBitmap(mPauseBitmap);
 					setButtonAlpha(127);
-				}break;
-		
+					break;
 				case STOPPED:
-				{	
 					mNM.cancelAll();
 					mPauseButton.setImageBitmap(mPlayBitmap);
 					mCancelButton.setVisibility(View.GONE);
 					mSetButton.setVisibility(View.VISIBLE);	
 					clearTime();
 					setButtonAlpha(255);
-				
-				}break;
+					break;
 		
 				case PAUSED:
-				{
 					mSetButton.setVisibility(View.GONE);
 					mPauseButton.setVisibility(View.VISIBLE);
 					mCancelButton.setVisibility(View.VISIBLE);
 					mPauseButton.setImageBitmap(mPlayBitmap);
 					setButtonAlpha(255);
-				}break;	
+					break;	
 			}
-			mCurrentState = state;		
 		}
-		
 	}
 	
 	private void setButtonAlpha(int i) {

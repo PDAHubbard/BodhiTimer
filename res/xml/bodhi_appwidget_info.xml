@@ -8,6 +8,6 @@
     android:initialLayout="@layout/appwidget"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen|keyguard"
-    android:initialKeyguardLayout="@layout/appwidget">
+    android:initialKeyguardLayout="@layout/appwidget"
     >
 </appwidget-provider>
