@@ -628,14 +628,14 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	private void playPreSound() {
         String uriString = mSettings.getString("PreSoundUri", "");
 		
+		if(uriString.equals("system"))
+			uriString = mSettings.getString("PreSystemUri", "");
+		else if(uriString.equals("file"))
+			uriString = mSettings.getString("PreFileUri", "");
+
         if(uriString.equals(""))
         	return;
-        
-		if(uriString.equals("system"))
-			uriString = mSettings.getString("SystemUri", "");
-		else if(uriString.equals("file"))
-			uriString = mSettings.getString("FileUri", "");
-
+		
 		Log.v(TAG,"preplay uri: "+uriString);
 
 		try {
