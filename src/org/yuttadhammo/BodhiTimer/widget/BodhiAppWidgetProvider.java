@@ -76,7 +76,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	        context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_OFF));
 	        isRegistered = true;
     	}
-		doUpdate(context);
+    	context.sendBroadcast(new Intent(ACTION_CLOCK_UPDATE));
     }
    
 	@Override
@@ -88,8 +88,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	        context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_OFF));
 	        isRegistered = true;
     	}    	
-		doUpdate(context);
-
+    	context.sendBroadcast(new Intent(ACTION_CLOCK_UPDATE));
 	}
 
 	@Override

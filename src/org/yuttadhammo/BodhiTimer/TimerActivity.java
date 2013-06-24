@@ -478,34 +478,33 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	        editor.putInt("State", state);
 	        editor.commit();
 			mCurrentState = state;		
-			
-			
-			switch(state)
-			{
-				case RUNNING:
-					mSetButton.setVisibility(View.GONE);
-					mCancelButton.setVisibility(View.VISIBLE);
-					mPauseButton.setVisibility(View.VISIBLE);
-					mPauseButton.setImageBitmap(mPauseBitmap);
-					setButtonAlpha(127);
-					break;
-				case STOPPED:
-					mNM.cancelAll();
-					mPauseButton.setImageBitmap(mPlayBitmap);
-					mCancelButton.setVisibility(View.GONE);
-					mSetButton.setVisibility(View.VISIBLE);	
-					clearTime();
-					setButtonAlpha(255);
-					break;
+		}
 		
-				case PAUSED:
-					mSetButton.setVisibility(View.GONE);
-					mPauseButton.setVisibility(View.VISIBLE);
-					mCancelButton.setVisibility(View.VISIBLE);
-					mPauseButton.setImageBitmap(mPlayBitmap);
-					setButtonAlpha(255);
-					break;	
-			}
+		switch(state)
+		{
+			case RUNNING:
+				mSetButton.setVisibility(View.GONE);
+				mCancelButton.setVisibility(View.VISIBLE);
+				mPauseButton.setVisibility(View.VISIBLE);
+				mPauseButton.setImageBitmap(mPauseBitmap);
+				setButtonAlpha(127);
+				break;
+			case STOPPED:
+				mNM.cancelAll();
+				mPauseButton.setImageBitmap(mPlayBitmap);
+				mCancelButton.setVisibility(View.GONE);
+				mSetButton.setVisibility(View.VISIBLE);	
+				clearTime();
+				setButtonAlpha(255);
+				break;
+	
+			case PAUSED:
+				mSetButton.setVisibility(View.GONE);
+				mPauseButton.setVisibility(View.VISIBLE);
+				mCancelButton.setVisibility(View.VISIBLE);
+				mPauseButton.setImageBitmap(mPlayBitmap);
+				setButtonAlpha(255);
+				break;	
 		}
 	}
 	
