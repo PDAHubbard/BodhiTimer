@@ -57,6 +57,8 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 
 	private PendingIntent pendingIntent;
 
+	private HashMap<String,Integer> backgrounds;
+
 	public static String ACTION_CLOCK_START = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_START";
 	public static String ACTION_CLOCK_UPDATE = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
 	public static String ACTION_CLOCK_CANCEL = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_CANCEL";
@@ -175,7 +177,8 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     		widgeta = ids.length > 0?Arrays.toString(ids).replace("[", ",").replace("]", ","):",";
         }
         widgetIds = widgeta.replaceAll("^,","").replaceAll(",$","").replaceAll(" ", "").split(",");
-				
+		
+        backgrounds = new HashMap<String,Integer>();
 		if (widgetIds.length > 0){
             for (int idx=0; idx<widgetIds.length; idx++) {
             	if(widgetIds[idx].length() == 0)
@@ -188,11 +191,15 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
                 // set background
                 themeid = mSettings.getInt("widget_theme_"+widgetIds[idx], R.drawable.widget_background_black_square);
             	views.setImageViewResource(R.id.backImage, themeid);
+            	backgrounds.put(widgetIds[idx], themeid);
                 appWidgetManager.updateAppWidget(Integer.parseInt(widgetIds[idx]), views);
             }
 		}
 	}
 	
+	int tick = 5;
+
+	private Bitmap bmp;
 	
     private void doTick() {
     	//Log.e(TAG,"ticking");
@@ -236,9 +243,11 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     	
 		float p = (mLastTime != 0) ? (delta/(float)mLastTime) : 0;
 		
-		Bitmap bmp;
 		if(then.after(now) && state == TimerActivity.RUNNING) {
-			bmp = adjustOpacity(originalBitmap,(int)(255-(255*p)));
+			if(bmp == null || ++tick == 10) {
+				bmp = adjustOpacity(originalBitmap,(int)(255-(255*p)));
+				tick = 0;
+			}
 		}
 		else
 			bmp = originalBitmap;
@@ -249,6 +258,13 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         for (int idx=0; idx<widgetIds.length; idx++) {
         	if(widgetIds[idx].length() == 0)
         		continue;
+            // set background
+        	if(backgrounds.containsKey(widgetIds[idx]))
+	            themeid = backgrounds.get(widgetIds[idx]);
+        	else
+	            themeid = R.drawable.widget_background_black;
+
+        	views.setImageViewResource(R.id.backImage, themeid);
         	appWidgetManager.updateAppWidget(Integer.parseInt(widgetIds[idx]), views);
         }
     }
