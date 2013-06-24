@@ -28,7 +28,8 @@
 				
 	<!-- Preferences -->
 	
-	<string name="notification">Notification</string>
+	<string name="preferences">Preferences</string>
+	<string name="sound">Sound</string>
 	<string name="notification_sound">Timer Sound</string>
 	<string name="notification_sound_desc">The sound to play when the timer finishes</string>
 
@@ -48,6 +49,7 @@
 	<string name="volume_desc">as percent of media volume setting</string>
 			
 		
+	<string name="notification">Notification</string>
 	<string name="notification_vibrate">Enable Vibration</string>
 	<string name="notification_vibrate_desc">Cause the timer to trigger vibration.</string>
 	

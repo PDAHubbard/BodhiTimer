@@ -94,7 +94,7 @@ public class TimerPrefActivity extends PreferenceActivity
     	player = new MediaPlayer();
     	
     	lastToneType = settings.getString("NotificationUri", (String)entryValues[1]);
-    	lastPreToneType = settings.getString("NotificationUri", (String)entryValues[1]);
+    	lastPreToneType = settings.getString("NotificationUri", (String)entryValues[0]);
     	
     	tone.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 			
