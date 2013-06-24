@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -173,7 +174,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
     		int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
     		widgeta = ids.length > 0?Arrays.toString(ids).replace("[", ",").replace("]", ","):",";
         }
-        widgetIds = widgeta.replaceAll("^,",",").replaceAll(",$",",").split(",");
+        widgetIds = widgeta.replaceAll("^,","").replaceAll(",$","").replaceAll(" ", "").split(",");
 				
 		if (widgetIds.length > 0){
             for (int idx=0; idx<widgetIds.length; idx++) {
@@ -183,7 +184,6 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         		// Get the layout for the App Widget and attach an on-click listener
                 // to the button
             	views.setOnClickPendingIntent(R.id.mainImage, pendingIntent);
-            	
             	
                 // set background
                 themeid = mSettings.getInt("widget_theme_"+widgetIds[idx], R.drawable.widget_background_black_square);
@@ -249,11 +249,6 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         for (int idx=0; idx<widgetIds.length; idx++) {
         	if(widgetIds[idx].length() == 0)
         		continue;
-        	views.setOnClickPendingIntent(R.id.mainImage, pendingIntent);
-        	
-            // set background
-            themeid = mSettings.getInt("widget_theme_"+widgetIds[idx], R.drawable.widget_background_black_square);
-        	views.setImageViewResource(R.id.backImage, themeid);
         	appWidgetManager.updateAppWidget(Integer.parseInt(widgetIds[idx]), views);
         }
     }

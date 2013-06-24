@@ -94,7 +94,7 @@ public class AppWidgetConfigure extends Activity implements OnClickListener {
     		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
     		ComponentName appWidgets = new ComponentName(context.getPackageName(), "org.yuttadhammo.BodhiTimer.widget.BodhiAppWidgetProvider");
     		int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
-			widgetIds = ids.length > 0?Arrays.toString(ids).replace("[", ",").replace("]", ","):",";
+			widgetIds = ids.length > 0?Arrays.toString(ids).replace("[", ",").replace("]", ",").replaceAll(" ", ""):",";
         }
         
     	SharedPreferences.Editor editor = prefs.edit();
@@ -111,7 +111,7 @@ public class AppWidgetConfigure extends Activity implements OnClickListener {
     		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
     		ComponentName appWidgets = new ComponentName(context.getPackageName(), "org.yuttadhammo.BodhiTimer.widget.BodhiAppWidgetProvider");
     		int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
-			widgetIds = ids.length > 0?Arrays.toString(ids).replace("[", ",").replace("]", ","):",";
+			widgetIds = ids.length > 0?Arrays.toString(ids).replace("[", ",").replace("]", ",").replaceAll(" ", ""):",";
         }
         
     	SharedPreferences.Editor editor = prefs.edit();
