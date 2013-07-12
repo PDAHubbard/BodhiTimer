@@ -85,7 +85,7 @@ public class TimerPrefActivity extends PreferenceActivity
 		tone.setEntries(entries);
 		tone.setEntryValues(entryValues);
 
-    	if(pretone.getValue() == null) pretone.setValue((String)entryValues[1]);
+    	if(pretone.getValue() == null) pretone.setValue((String)entryValues[0]);
     	pretone.setDefaultValue((String)entryValues[0]);
     	
     	pretone.setEntries(entries);

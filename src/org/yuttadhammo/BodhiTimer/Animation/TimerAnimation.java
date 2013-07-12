@@ -1,6 +1,5 @@
 package org.yuttadhammo.BodhiTimer.Animation;
 
-import org.yuttadhammo.BodhiTimer.R;
 import org.yuttadhammo.BodhiTimer.TimerActivity;
 
 import java.io.FileNotFoundException;
@@ -13,10 +12,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 public class TimerAnimation extends ImageView implements OnClickListener, OnSharedPreferenceChangeListener
