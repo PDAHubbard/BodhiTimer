@@ -49,7 +49,7 @@ public class VolumePreference extends DialogPreference implements SeekBar.OnSeek
         mSuffix = "%";
 
         // Get default and max seekbar values :
-        mDefault = 0;
+        mDefault = 100;
         mMax = attrs.getAttributeIntValue(androidns, "max", 100);
     }
     // ------------------------------------------------------------------------------------------

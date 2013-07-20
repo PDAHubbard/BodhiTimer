@@ -49,7 +49,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	
 	private boolean isRegistered = false;
 
-	private String[] widgetIds;
+	private int[] widgetIds;
 
 	private Bitmap originalBitmap;
 
@@ -57,7 +57,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 
 	private PendingIntent pendingIntent;
 
-	private HashMap<String,Integer> backgrounds;
+	private HashMap<Integer,Integer> backgrounds;
 
 	public static String ACTION_CLOCK_START = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_START";
 	public static String ACTION_CLOCK_UPDATE = "org.yuttadhammo.BodhiTimer.ACTION_CLOCK_UPDATE";
@@ -163,26 +163,13 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 		mLastTime = mSettings.getInt("LastTime",0); 
 		state = mSettings.getInt("State",TimerActivity.STOPPED); 
 
-		// get list of currently visible widgets (or fall back to getting list of all past widgets
-		
 		appWidgetManager = AppWidgetManager.getInstance(context);
-		String widgeta = mSettings.getString("widgetIds", null);
+		ComponentName appWidgets = new ComponentName(context.getPackageName(), "org.yuttadhammo.BodhiTimer.widget.BodhiAppWidgetProvider");
+		widgetIds = appWidgetManager.getAppWidgetIds(appWidgets);
 		
-		Log.d(TAG,"Widget id list: "+widgeta);
-		
-        if(widgeta == null) {
-    		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-    		ComponentName appWidgets = new ComponentName(context.getPackageName(), "org.yuttadhammo.BodhiTimer.widget.BodhiAppWidgetProvider");
-    		int ids[] = appWidgetManager.getAppWidgetIds(appWidgets);
-    		widgeta = ids.length > 0?Arrays.toString(ids).replace("[", ",").replace("]", ","):",";
-        }
-        widgetIds = widgeta.replaceAll("^,","").replaceAll(",$","").replaceAll(" ", "").split(",");
-		
-        backgrounds = new HashMap<String,Integer>();
+        backgrounds = new HashMap<Integer,Integer>();
 		if (widgetIds.length > 0){
             for (int idx=0; idx<widgetIds.length; idx++) {
-            	if(widgetIds[idx].length() == 0)
-            		continue;
         		
         		// Get the layout for the App Widget and attach an on-click listener
                 // to the button
@@ -192,7 +179,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
                 themeid = mSettings.getInt("widget_theme_"+widgetIds[idx], R.drawable.widget_background_black_square);
             	views.setImageViewResource(R.id.backImage, themeid);
             	backgrounds.put(widgetIds[idx], themeid);
-                appWidgetManager.updateAppWidget(Integer.parseInt(widgetIds[idx]), views);
+                appWidgetManager.updateAppWidget(widgetIds[idx], views);
             }
 		}
 	}
@@ -256,8 +243,6 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 		
         // Tell the widget manager
         for (int idx=0; idx<widgetIds.length; idx++) {
-        	if(widgetIds[idx].length() == 0)
-        		continue;
             // set background
         	if(backgrounds.containsKey(widgetIds[idx]))
 	            themeid = backgrounds.get(widgetIds[idx]);
@@ -265,7 +250,7 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
 	            themeid = R.drawable.widget_background_black;
 
         	views.setImageViewResource(R.id.backImage, themeid);
-        	appWidgetManager.updateAppWidget(Integer.parseInt(widgetIds[idx]), views);
+        	appWidgetManager.updateAppWidget(widgetIds[idx], views);
         }
     }
 
