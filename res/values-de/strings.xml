@@ -11,8 +11,6 @@
 	<string name="warning_title">Warnung</string>
 	<string name="warning_button">OK</string>
 	
-	<string name="timer_for">"Timer für "</string>
-	
 	<string name="prefs">Einstellungen</string>
 	
 	<!-- Preferences -->

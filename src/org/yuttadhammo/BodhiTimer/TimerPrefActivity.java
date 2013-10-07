@@ -1,10 +1,15 @@
 package org.yuttadhammo.BodhiTimer;
 
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -19,6 +24,7 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Parcelable;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
@@ -76,7 +82,15 @@ public class TimerPrefActivity extends PreferenceActivity
         preplay = (Preference)findPreference("playPreSound");
 
     	CharSequence [] entries = {"No Sound","Three Bells","One Bell","Gong","Singing Bowl","System Tone","Sound File"};
-    	CharSequence [] entryValues = {"","android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell1,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.gong,"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bowl,"system","file"};
+    	final CharSequence [] entryValues = {
+    			"",
+    			"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell,
+    			"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bell1,
+    			"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.gong,
+    			"android.resource://org.yuttadhammo.BodhiTimer/" + R.raw.bowl,
+    			"system",
+    			"file"
+    		};
     	
     	//Default value
     	if(tone.getValue() == null) tone.setValue((String)entryValues[1]);
@@ -390,6 +404,82 @@ public class TimerPrefActivity extends PreferenceActivity
 
     	});
 
+        Preference export = (Preference)findPreference("exportPref");
+
+        export.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+			
+    		@Override
+			public boolean onPreferenceClick(Preference preference) {
+                Log.i(TAG,"clicked export"); 
+				
+	    		if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+	                Toast.makeText(activity, "SD Card not mounted.", 
+	                        Toast.LENGTH_SHORT).show();
+	                return true;
+	    		}
+
+    	        ProgressDialog downloadProgressDialog = new ProgressDialog(activity);
+    	        downloadProgressDialog.setCancelable(false);
+    	        downloadProgressDialog.setMessage(getString(R.string.exporting));
+    	        downloadProgressDialog.setIndeterminate(true);
+	    		downloadProgressDialog.show();
+    	        try {
+                    Log.i(TAG,"exporting"); 
+    				File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "music");
+    				if (!path.exists())
+    					path.mkdir();
+    				
+    				// Check a second time, if not the most likely cause is the volume doesn't exist
+    				if(!path.exists()) {
+    	                Toast.makeText(activity, "Problem accessing SD Card.", 
+    	                        Toast.LENGTH_SHORT).show();
+    	                return true;
+    	    		}
+    				path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "music" + File.separator + "notifications");
+    				
+    				if (!path.exists())
+    					path.mkdir();
+
+    			    InputStream in = null;
+    			    OutputStream out = null;
+    			    int[] sounds = {R.raw.bell,R.raw.bell1,R.raw.bowl,R.raw.gong};
+    			    String[] soundNames = {"bell","bell1","bowl","gong"};
+	        		downloadProgressDialog.setMax(sounds.length);
+    			    for(int idx = 0;idx < sounds.length; idx++) {
+                        Log.i(TAG,"exporting "+soundNames[idx]); 
+    	        		
+    	        		in = activity.getResources().openRawResource(sounds[idx]);
+    	                File outFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "music" + File.separator + "notifications" + File.separator + soundNames[idx]+".ogg");
+    	                if(outFile.exists())
+    	                	continue;
+    	                outFile.createNewFile();
+    	                
+    	                out = new FileOutputStream(outFile);
+    	                byte[] buffer = new byte[1024];
+    			        int read;
+    			        while ((read = in.read(buffer)) != -1) {
+    			            out.write(buffer, 0, read);
+    			        }
+    			        in.close();
+    			        in = null;
+    			        out.flush();
+    			        out.close();
+    			        out = null;    				
+    	        		downloadProgressDialog.setProgress(idx+1);
+    	        	}
+	                Toast.makeText(activity, "Sounds copied to"+Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "music" + File.separator + "notifications", 
+	                        Toast.LENGTH_SHORT).show();
+    	        }
+    	        catch(Exception e) {
+    	        	e.printStackTrace();
+    	        }
+    	        downloadProgressDialog.dismiss();
+    			return true;
+				   			
+			}
+
+    	});
+        
     }
 
     @Override

@@ -18,7 +18,12 @@
 	<string name="one_min"> 1 minute</string>
 	<string name="x_secs"> %d seconds</string>
 	<string name="one_sec"> 1 second</string>
-			
+
+	<string name="hour">hour</string>
+	<string name="minute">minute</string>
+	<string name="second">second</string>
+	<string name="speech_description">Speak the time you would like to set…</string>
+						
 	<string name="prefs">Preferences</string>
 
 	<!-- Widget -->
@@ -90,11 +95,18 @@
 	<string name="stay_awake">Stay Awake</string>
 	<string name="stay_awake_desc">Don\'t allow the phone to go to sleep.</string>
 
+	<string name="switch_time">Switch Time Input Mode</string>
+	<string name="switch_time_desc">Clicking on clock opens speech input (otherwise on long-click).</string>
+	
 	<string name="override_sound">Force Custom Sound</string>
 	<string name="override_sound_desc">use this only if you are not able to set a custom sound for the timer</string>
 		
 	<string name="about_desc">About Bodhi Timer</string>
-	
+
+	<string name="export_sounds">Export Sounds</string>
+	<string name="export_sounds_desc">Copy built-in sound files to SD Card</string>
+	<string name="exporting">Exporting sounds…</string>
+				
 	<!-- About -->
 	<string name="close">Close</string>
 	<string name="about">About</string>

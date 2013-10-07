@@ -87,6 +87,11 @@
                 android:title="@string/auto_restart"
                 android:summary="@string/auto_restart_desc"
                 android:defaultValue="False" />
+        <CheckBoxPreference
+                android:key="SwitchTimeMode"
+                android:title="@string/switch_time"
+                android:summary="@string/switch_time_desc"
+                android:defaultValue="False" />
 		<CheckBoxPreference
 			android:key="WakeLock"
 			android:title="@string/stay_awake"
@@ -96,5 +101,8 @@
 			android:title="@string/about"
 			android:summary="@string/about_desc"
 			android:key="aboutPref" />	
-                    
+		<Preference
+			android:title="@string/export_sounds"
+			android:summary="@string/export_sounds_desc"
+			android:key="exportPref" />	
 </PreferenceScreen>

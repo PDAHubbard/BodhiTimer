@@ -16,8 +16,10 @@ import org.yuttadhammo.BodhiTimer.NNumberPickerDialog.OnNNumberPickedListener;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,11 +51,14 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
+import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.WindowManager.LayoutParams;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -148,6 +153,18 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         
 		mSetButton = (ImageButton)findViewById(R.id.setButton);
         mSetButton.setOnClickListener(this);
+        mSetButton.setOnLongClickListener(new OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View v) {
+				if(mSettings.getBoolean("SwitchTimeMode", false))
+					showNumberPicker();
+				else
+					startVoiceRecognitionActivity();
+				return false;
+			}
+        	
+        });
        
         mPauseButton = (ImageButton)findViewById(R.id.pauseButton);
         mPauseButton.setOnClickListener(this);
@@ -345,22 +362,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
         return super.onKeyDown(keycode, e);
     }
 
-	protected void  onActivityResult (int requestCode, int resultCode, Intent  data) {
-		if(LOG) Log.v(TAG,"Got result");
-		if(resultCode == Activity.RESULT_OK) {
-			int[] values = data.getIntArrayExtra("times");
-			onNumbersPicked(values);
-			if(widget) {
-				finish();
-			}
-		}
-		widget = false;
-	}
-
     private void showNumberPicker() {
 		Intent i = new Intent(this, NNumberPickerDialog.class);
 		i.putExtra("times", lastTimes);
-    	startActivityForResult(i, 1);
+    	startActivityForResult(i, NUMBERPICK_REQUEST_CODE);
 	}
 
 	
@@ -683,7 +688,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 		switch(v.getId()){
 			case R.id.setButton:
 				Log.i("Timer","set button clicked");
-				showNumberPicker();
+				if(mSettings.getBoolean("SwitchTimeMode", false))
+					startVoiceRecognitionActivity();
+				else
+					showNumberPicker();
 				break;
 
 			case R.id.prefButton:
@@ -810,4 +818,66 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 			doTick();
 		}
     };
+
+	private int VOICE_RECOGNITION_REQUEST_CODE = 1234;
+
+	private int NUMBERPICK_REQUEST_CODE = 5678;
+    
+	/**
+	 * Fire an intent to start the speech recognition activity.
+	 */
+	private void startVoiceRecognitionActivity() {
+		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+
+		// Specify the calling package to identify your application
+		intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
+
+		// Display an hint to the user about what he should say.
+		intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.speech_description));
+
+		// Give a hint to the recognizer about what the user is going to say
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+
+		// Specify how many results you want to receive. The results will be sorted
+		// where the first result is the one with higher confidence.
+		intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
+
+		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
+	}
+
+	/**
+	 * Handle the results from the recognition activity.
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(LOG) Log.v(TAG,"Got result");
+		if (requestCode == VOICE_RECOGNITION_REQUEST_CODE && resultCode == RESULT_OK) {
+			// Fill the list view with the strings the recognizer thought it could have heard
+			ArrayList<String> matches = data.getStringArrayListExtra(
+					RecognizerIntent.EXTRA_RESULTS);
+			for(String match : matches) {
+				match = match.toLowerCase();
+				Log.d(TAG,"Got speech: "+ match);
+				int speechTime = TimerUtils.str2timeString(this, match);
+				if(speechTime != 0) {
+					int[] values = TimerUtils.time2Array(speechTime);
+					onNumbersPicked(values);
+					break;
+				}
+			}
+		}
+		else if (requestCode == NUMBERPICK_REQUEST_CODE && resultCode == RESULT_OK){
+				int[] values = data.getIntArrayExtra("times");
+				onNumbersPicked(values);
+				if(widget) {
+					finish();
+				}
+		}
+
+		widget = false;
+
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
 }

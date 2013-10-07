@@ -1,6 +1,11 @@
 package org.yuttadhammo.BodhiTimer;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
 
 public class TimerUtils {
@@ -119,4 +124,47 @@ public class TimerUtils {
 		else
 			return("");
 	}
+
+
+	public static int str2timeString(Activity activity, String numberString) {
+        final Resources res = activity.getResources();
+        final String[] numbers = res.getStringArray(R.array.numbers);
+        int position = 0;
+        String newString = numberString;
+        for(String number : numbers) {
+        	int num = 60 - position++;
+        	newString = newString.replaceAll(number, Integer.toString(num));
+        }
+        
+        Pattern HOUR = Pattern.compile("([0-9]+) "+activity.getString(R.string.hour));
+        Pattern MINUTE = Pattern.compile("([0-9]+) "+activity.getString(R.string.minute));
+        Pattern SECOND = Pattern.compile("([0-9]+) "+activity.getString(R.string.second));
+        
+        int hours = 0;
+        int minutes = 0;
+        int seconds = 0;
+        
+        Matcher m = HOUR.matcher(newString);
+        while (m.find()) {
+            String match = m.group(1);
+            hours += Integer.parseInt(match);
+        }
+
+        m = MINUTE.matcher(newString);
+        while (m.find()) {
+            String match = m.group(1);
+            minutes += Integer.parseInt(match);
+        }
+
+        m = SECOND.matcher(newString);
+        while (m.find()) {
+            String match = m.group(1);
+            seconds += Integer.parseInt(match);
+        }
+
+		Log.d(TAG,"Got numbers: "+ hours + " hours, " + minutes + " minutes, "+seconds+" seconds");
+        
+        return hours*60*60*1000 + minutes*60*1000 + seconds*1000;
+	}
+
 }

@@ -134,13 +134,11 @@ public class BodhiAppWidgetProvider extends AppWidgetProvider {
         if(views == null)
     		views = new RemoteViews(context.getPackageName(), R.layout.appwidget);
 
-        if(pendingIntent == null) {
-        	Intent intent = new Intent(context, TimerActivity.class);
-            intent.putExtra("set", "true");
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+    	Intent intent = new Intent(context, TimerActivity.class);
+        intent.putExtra("set", "true");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         
     	if(!mSettings.getBoolean("custom_bmp", false) || mSettings.getString("bmp_url","").length() == 0) {
 			Resources resources = context.getResources();
