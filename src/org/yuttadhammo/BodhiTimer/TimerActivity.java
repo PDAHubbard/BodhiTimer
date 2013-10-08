@@ -329,7 +329,10 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
                 mNM.cancelAll();
         		timerStop();
         		if(widget) {
-        			showNumberPicker();
+    				if(mSettings.getBoolean("SwitchTimeMode", false))
+    					startVoiceRecognitionActivity();
+    				else
+    					showNumberPicker();
         			return;
         		}
         		break;

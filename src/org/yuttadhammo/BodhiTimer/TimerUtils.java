@@ -61,15 +61,18 @@ public class TimerUtils {
 	public static int [] time2Array(int time)
 	{
 		int ms = time % 1000;
-		int seconds = (int) (time / 1000);
-		int minutes = seconds / 60;
-		int hour = minutes / 60;
+		int seconds = (int) (time / 1000);  // 3550000 / 1000 = 3550
+		int minutes = seconds / 60; // 59.16666
+		int hours = minutes / 60; // 0.9
  
-		minutes = minutes % 60;
+		if(hours > 60)
+			hours = 60;
+		
+		minutes = minutes % 60; 
    		seconds = seconds % 60;
    		
 		int [] timeVec = new int[4];
-		timeVec[0] = hour;
+		timeVec[0] = hours;
 		timeVec[1] = minutes;
 		timeVec[2] = seconds;
 		timeVec[3] = ms;
@@ -164,7 +167,10 @@ public class TimerUtils {
 
 		Log.d(TAG,"Got numbers: "+ hours + " hours, " + minutes + " minutes, "+seconds+" seconds");
         
-        return hours*60*60*1000 + minutes*60*1000 + seconds*1000;
+        int total = hours*60*60*1000 + minutes*60*1000 + seconds*1000;
+        if (total > 60*60*60*1000 + 59*60*1000 + 59*1000)
+        	total = 60*60*60*1000 + 59*60*1000 + 59*1000;
+        return total;
 	}
 
 }
