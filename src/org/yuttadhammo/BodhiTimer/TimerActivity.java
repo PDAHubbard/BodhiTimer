@@ -15,11 +15,9 @@ import org.yuttadhammo.BodhiTimer.Animation.TimerAnimation;
 import org.yuttadhammo.BodhiTimer.NNumberPickerDialog.OnNNumberPickedListener;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,10 +26,9 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -47,9 +44,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.SystemClock;
-import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.util.Log;
@@ -58,7 +53,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.WindowManager.LayoutParams;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -830,23 +824,31 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 	 * Fire an intent to start the speech recognition activity.
 	 */
 	private void startVoiceRecognitionActivity() {
-		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		try {
+			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+	
+			// Specify the calling package to identify your application
+			intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
+	
+			// Display an hint to the user about what he should say.
+			intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.speech_description));
+	
+			// Give a hint to the recognizer about what the user is going to say
+			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+					RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+	
+			// Specify how many results you want to receive. The results will be sorted
+			// where the first result is the one with higher confidence.
+			intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
+	
+			startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
+		}
+		catch(ActivityNotFoundException e)
+		{
+			Intent browserIntent = new Intent(Intent.ACTION_VIEW,   Uri.parse("https://market.android.com/details?id=com.google.android.voicesearch"));
+			startActivity(browserIntent);
 
-		// Specify the calling package to identify your application
-		intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
-
-		// Display an hint to the user about what he should say.
-		intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.speech_description));
-
-		// Give a hint to the recognizer about what the user is going to say
-		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-
-		// Specify how many results you want to receive. The results will be sorted
-		// where the first result is the one with higher confidence.
-		intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
-
-		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
+		}
 	}
 
 	/**
@@ -865,9 +867,12 @@ public class TimerActivity extends Activity implements OnClickListener,OnNNumber
 				int speechTime = TimerUtils.str2timeString(this, match);
 				if(speechTime != 0) {
 					int[] values = TimerUtils.time2Array(speechTime);
+					Toast.makeText(this, TimerUtils.time2hms(speechTime), Toast.LENGTH_SHORT).show();
 					onNumbersPicked(values);
 					break;
 				}
+				else
+					Toast.makeText(this, getString(R.string.speech_not_recognized), Toast.LENGTH_SHORT).show();
 			}
 		}
 		else if (requestCode == NUMBERPICK_REQUEST_CODE && resultCode == RESULT_OK){
